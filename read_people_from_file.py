@@ -25,7 +25,7 @@ def read_people_from_file(file_name):
         # print(pkyr_cat)
         LCRAT_1mon_risk = input_worksheet.cell_value(i, 19)
 
-        p = Person(ID, age, gender, smkyears, cpd, race, emp, fam_lung_trend, bmi, edu6, qtyears, pkyr_cat, LCRAT_1mon_risk)
+        p = Person(age, gender, smkyears, qtyears, cpd, race, emp, fam_lung_trend, bmi, edu6, pkyr_cat, LCRAT_1mon_risk, ID)
         # print(p.ID)
         people_list.append(p)
 

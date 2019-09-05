@@ -1,11 +1,12 @@
-from person import Person
+from person import Person, get_model_coef_from_file, get_basehaz_from_file
 from read_LC_table_from_file import read_LC_table_from_file
 from read_distant_cancer_table_from_file import read_distant_cancer_table_from_file
 from read_life_table_from_file import read_life_table_from_file
+from read_people_from_file import read_people_from_file
 from read_regional_cancer_table_from_file import read_regional_cancer_table_from_file
 
 
-def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_table, progress, root, display_progress=True):
+def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_table, progress=None, root=None, display_progress=True):
     """ Returns the total years remain - NO screening """
     print("Getting Years Remain. Please wait ...", end="")
     remain = 0
@@ -27,11 +28,17 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
     display_dot = 100
     unit = 0
     current_month = 1
-    progress['style'] = "red.Horizontal.TProgressbar"
+    try:
+        progress['style'] = "red.Horizontal.TProgressbar"
+    except TypeError:
+        pass
     while running_age < 100:
         # update the progress bar in gui2
-        progress['value'] = (running_age - 75) * 4
-        root.update_idletasks()
+        try:
+            progress['value'] = (running_age - 50) ** 2 / 25
+            root.update_idletasks()
+        except TypeError:
+            pass
 
         if display_progress:
             if (current_month / total_month) > (unit / display_dot):
@@ -41,6 +48,7 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
 
         # Constant a. Age-, sex-, and race/ethnicity-specific prob. of dying from life table.
         # See Sheet "Life-table", column K to R. This is per month prob
+        # print("int(running_age) - 50 = " + str(int(running_age) - 50) + " | a_column = " + str(a_column))
         a = life_table[int(running_age) - 50][a_column]
 
         # disease_free
@@ -132,8 +140,12 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
         running_age += 1 / 12  # increase age by a month
 
     print("done")
-    progress['style'] = "green.Horizontal.TProgressbar"
-    progress['value'] = progress["maximum"]
+    try:
+        progress['style'] = "green.Horizontal.TProgressbar"
+        progress['value'] = progress["maximum"]
+    except TypeError:
+        pass
+
     return remain / 12  # remain increased every loop (every month). Have to return in years by dividing by 12
 
 
@@ -148,4 +160,33 @@ def test():
     p2 = Person(80, 0, 0, 0, 0, 0, 0, 0, 24.62, 0)
     print(get_years_remain(p2, life_table1, local_cancer2, regional_cancer3, distant_cancer4, False))
 
-# test()
+def test2():
+    # init reading data table
+    life_table = read_life_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
+    local_cancer = read_LC_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
+    regional_cancer = read_regional_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
+    distant_cancer = read_distant_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
+
+    # initiate the basehaz and the model_coef array to calculate the LCRAT_1mon_risk
+    basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
+    basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
+    basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
+    model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
+    model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
+
+    people_list = read_people_from_file("input/lcrisk_tool.xlsx")
+    # print(people_list[0].age)
+
+    total_years_remain = 0
+    for i in range(len(people_list)):
+        # people_list[i].initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
+        years_remain = get_years_remain(people_list[i], life_table, local_cancer, regional_cancer, distant_cancer,
+                                        None, None, True)
+        print("Years remain: " + str(years_remain) + " \n")
+        total_years_remain += years_remain
+
+    print("\n ------------------------ \nTotal life years remain: " + str(total_years_remain) + " \n")
+    print("Average life years per person: " + str(total_years_remain / len(people_list)) + " \n ----------------- \n")
+
+
+# test2()

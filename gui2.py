@@ -16,6 +16,25 @@ except ImportError:
     # Python3
     import tkinter as tk
 
+
+def initiate_table_and_array_from_file():
+    global life_table, local_cancer, regional_cancer, distant_cancer, \
+        basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F
+
+    # init reading data table
+    life_table = read_life_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
+    local_cancer = read_LC_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
+    regional_cancer = read_regional_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
+    distant_cancer = read_distant_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
+
+    # initiate the basehaz and the model_coef array to calculate the LCRAT_1mon_risk
+    basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
+    basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
+    basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
+    model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
+    model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
+
+
 old_age_choice = None
 old_gender_choices = None
 old_smk_years_choices = None
@@ -78,6 +97,15 @@ def set_new_changing_state(p):
 
 
 def go():
+    if one_person_var.get():
+        run_model_for_1_person()
+
+    if list_people_var.get():
+        # read data from "lcrisk_tool.xlsx" file
+        run_model_for_list_of_people("input/lcrisk_tool.xlsx")
+
+
+def run_model_for_1_person():
     if state_not_changing():
         return
 
@@ -96,19 +124,6 @@ def go():
                        + " | BMI:" + bmi_entry.get()
                        + " | Education:" + edu6_menu.tk_var.get()
                        + "\n ---------------------------- \n")
-
-    # print(int(age_menu.tk_var.get())
-    #       , gender_choices.index(gender_menu.tk_var.get())
-    #       , smk_years_choices.index(smk_years_menu.tk_var.get())
-    #       , qt_years_choices.index(qt_years_menu.tk_var.get())
-    #       , cpd_choices.index(cpd_menu.tk_var.get())
-    #       , race_choices.index(race_menu.tk_var.get())
-    #       , emp_choices.index(emp_menu.tk_var.get())
-    #       , flt_choices.index(flt_menu.tk_var.get())
-    #       , gender_choices.index(gender_menu.tk_var.get())
-    #       , float(bmi_entry.get())
-    #       , edu6_choices.index(edu6_menu.tk_var.get())
-    #       )
 
     p1 = Person(int(age_menu.tk_var.get())
                 , gender_choices.index(gender_menu.tk_var.get())
@@ -136,27 +151,31 @@ def go():
     go_button['state'] = 'normal'
 
 
-def process_people_list():
-    # read data from "lcrisk_tool.xlsx" file
-    people_list = read_people_from_file("input/lcrisk_tool.xlsx")
+def run_model_for_list_of_people(filename):
+    output_text.insert(tk.END, "Start Analyzing Model for the list of people in file [" + filename + "] ...\n")
+
+    people_list = read_people_from_file(filename)
     # print(people_list[0].ID)
 
     total_years_remain = 0
     for i in range(len(people_list)):
-        years_remain = get_years_remain(people_list[i], life_table, local_cancer, regional_cancer, distant_cancer)
+        # people_list[i].initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
+        years_remain = get_years_remain(people_list[i], life_table, local_cancer, regional_cancer, distant_cancer,
+                                        progress, root, False)
+        output_text.insert(tk.END, "Person [" + str(people_list[i].ID) + "] Years remain: " + str(years_remain) + " \n")
         total_years_remain += years_remain
 
-    output_text.insert(tk.END, "Total life years remain: " + str(total_years_remain) + " \n")
+    output_text.insert(tk.END, "\nTotal life years remain: " + str(total_years_remain) + " \n")
     output_text.insert(tk.END,
                        "Average life years per person: " + str(total_years_remain / len(people_list)) + " \n")
-
-
-root = tk.Tk()
+    output_text.insert(tk.END, " ---------------------------- \n")
 
 
 def donothing():
     x = 0
 
+
+root = tk.Tk()
 
 # Creating the main menu bar
 menu_bar = tk.Menu(root)
@@ -296,12 +315,15 @@ photo = tk.PhotoImage(file=r"./images/Go-button_100.png")
 go_button = tk.Button(frame2, text='Go !', image=photo, bg="#5fb7fa", borderwidth=0, command=go)
 go_button.pack()
 
-# Checkbox
-var1 = tk.IntVar()
-var1.set(1)
-check_above = tk.Checkbutton(frame2, text="Run model for the person above", variable=var1, bg="#5fb7fa").pack()
-var2 = tk.IntVar()
-tk.Checkbutton(frame2, text="Read the list of people data from", variable=var2, bg="#5fb7fa").pack()
+# Run model for the person above Checkbox
+one_person_var = tk.IntVar()
+one_person_var.set(1)
+check_above = tk.Checkbutton(frame2, text="Run model for the person above", variable=one_person_var,
+                             bg="#5fb7fa").pack()
+
+# Read the list of people Checkbox
+list_people_var = tk.IntVar()
+tk.Checkbutton(frame2, text="Read the list of people data from", variable=list_people_var, bg="#5fb7fa").pack()
 file_name_entry = tk.Entry(frame2, width=30)
 file_name_entry.insert(tk.END, 'lcrisk_tool.xlsx')
 file_name_entry.pack()
@@ -317,18 +339,7 @@ output_text.pack(side=tk.LEFT, fill=tk.Y)
 S.config(command=output_text.yview)
 output_text.config(yscrollcommand=S.set)
 
-# init reading data table
-life_table = read_life_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-local_cancer = read_LC_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-regional_cancer = read_regional_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-distant_cancer = read_distant_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-
-# initiate the basehaz and the model_coef array to calculate the LCRAT_1mon_risk
-basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
-basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
-basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
-model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
-model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
+initiate_table_and_array_from_file()
 
 print("Starting GUI ...")
 root.mainloop()
