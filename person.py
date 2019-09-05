@@ -18,7 +18,7 @@ def get_basehaz_from_file(file_name, column):
 
 
 def get_model_coef_from_file(file_name, column):
-    print("Reading [model_coef] array [column : " + str(column) + "] from file [" + file_name + "] ...", end="")
+    print("Reading [model_coef] array [column " + str(column) + "] from file [" + file_name + "] ...", end="")
     table = [0, 1, 2, 3]
 
     input_workbook = xlrd.open_workbook(file_name)

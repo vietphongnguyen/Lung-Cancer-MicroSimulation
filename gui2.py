@@ -1,5 +1,5 @@
 from DropdownOptionMenu import DropdownOptionMenu
-from person import Person
+from person import Person, get_model_coef_from_file, get_basehaz_from_file
 from read_LC_table_from_file import read_LC_table_from_file
 from read_distant_cancer_table_from_file import read_distant_cancer_table_from_file
 from read_life_table_from_file import read_life_table_from_file
@@ -53,6 +53,8 @@ def go():
                 , float(bmi_entry.get())
                 , edu6_choices.index(edu6_menu.tk_var.get())
                 )
+
+    p1.initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
 
     years_remain = get_years_remain(p1, life_table, local_cancer, regional_cancer, distant_cancer, False)
 
@@ -234,6 +236,13 @@ life_table = read_life_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx
 local_cancer = read_LC_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
 regional_cancer = read_regional_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
 distant_cancer = read_distant_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
+
+# initiate the basehaz and the model_coef array to calculate the LCRAT_1mon_risk
+basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
+basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
+basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
+model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
+model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
 
 print("Starting GUI ...")
 root.mainloop()
