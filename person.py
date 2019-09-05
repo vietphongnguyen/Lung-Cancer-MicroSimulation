@@ -3,29 +3,29 @@ import math
 import xlrd
 
 
-def get_basehaz_from_file(file_name):
-    print("Reading Baseline hazard/survival array from file [" + file_name + "] ...", end="")
+def get_basehaz_from_file(file_name, column):
+    print("Reading Baseline hazard/survival [column " + str(column) + "] from file [" + file_name + "] ...", end="")
     table = []
 
     input_workbook = xlrd.open_workbook(file_name)
     input_worksheet = input_workbook.sheet_by_name("basehaz")
     for i in range(4, input_worksheet.nrows):
-        time = float(input_worksheet.cell_value(i, 5))
-        table.append(time)
+        surv = float(input_worksheet.cell_value(i, column))
+        table.append(surv)
 
     print("done")
     return table
 
 
 def get_model_coef_from_file(file_name, column):
-    print("Reading [model_coef] array [at column : " + str(column) + " ] from file [" + file_name + "] ...", end="")
+    print("Reading [model_coef] array [column : " + str(column) + "] from file [" + file_name + "] ...", end="")
     table = [0, 1, 2, 3]
 
     input_workbook = xlrd.open_workbook(file_name)
     input_worksheet = input_workbook.sheet_by_name("model_coef")
     for i in range(4, 20):
         try:
-            coef = float(input_worksheet.cell_value(i-1, column))
+            coef = float(input_worksheet.cell_value(i - 1, column))
         except ValueError:
             coef = float(0.0)
         table.append(coef)
@@ -60,10 +60,7 @@ class Person:
         self.LCRAT_1mon_risk = LCRAT_1mon_risk  # (Constant b) 1 month risk. Incidence of lung cancer by age, sex, race.
         # Lung cancer risk model-LCRAT
 
-    def initiate_LCRAT_1mon_risk(self, basehaz=get_basehaz_from_file("input/lcrisk_tool.xlsx")):
-
-        print("[basehaz] table has " + str(len(basehaz)) + " items : ", end="")
-        print(basehaz)
+    def initiate_LCRAT_1mon_risk(self, basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F):
 
         # LCRAT_RR = EXP(   calculator!C2*model_coef!$D$4
         #                   +(IF(calculator!G2=1,1,0))*model_coef!$D$5
@@ -82,9 +79,6 @@ class Person:
         #                   +LN(IF(calculator!E2="NA",0,calculator!E2)+1)*model_coef!$D$18
         #                   +calculator!D2*model_coef!$D$19
         #                )
-
-        model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx",3)
-        print(model_coef_D)
 
         # calculator!C2 * model_coef!$D$4
         x = self.gender * model_coef_D[4]
@@ -138,7 +132,7 @@ class Person:
         x += math.log(self.bmi) * model_coef_D[17]
 
         # +LN(IF(calculator!E2="NA",0,calculator!E2)+1)*model_coef!$D$18
-        x += math.log(self.qtyears) * model_coef_D[18]
+        x += math.log(self.qtyears + 1) * model_coef_D[18]
 
         # +calculator!D2*model_coef!$D$19
         x += self.smkyears * model_coef_D[19]
@@ -161,8 +155,6 @@ class Person:
         #                       + LN(IF(calculator!E2="NA",0,calculator!E2)+1) * model_coef!$F$17
         #                       + calculator!D2 * model_coef!$F$18
         #                   )
-
-        model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
 
         # calculator!C2*model_coef!$F$4
         y = self.gender * model_coef_F[4]
@@ -219,21 +211,21 @@ class Person:
 
         self.cox_death_RR = math.exp(y)
 
-        print("self.LCRAT_RR = " + str(self.LCRAT_RR) + "  |  self.cox_death_RR = " + str(self.cox_death_RR))
+        # print("LCRAT_RR = " + str(self.LCRAT_RR) + "  |  cox_death_RR = " + str(self.cox_death_RR))
 
-        # LCRAT_13yr_risk =     SUMPRODUCT(--(basehaz!$F$5:$F$1261<=13),
+        # LCRAT_13yr_risk =     SUMPRODUCT(--(basehaz!$F$5:$F$1261<=13),        # always = 1  --> IGNORE
         #                               (basehaz!$H$5:$H$1261)^calculator!O2,
         #                               basehaz!$G$5:$G$1261,
         #                               (basehaz!$J$5:$J$1261)^calculator!P2)
         #                       * calculator!O2
         sum_product = float(0.0)
-        for i in basehaz:
-            if i <= 13:
-                sum_product += (i ** self.LCRAT_RR) * i * (i ** self.cox_death_RR)
+        for i in range(0, len(basehaz_G)):
+            sum_product += basehaz_H[i] ** self.LCRAT_RR * basehaz_G[i] * (basehaz_J[i] ** self.cox_death_RR)
         self.LCRAT_13yr_risk = sum_product * self.LCRAT_RR
+        # print(self.LCRAT_13yr_risk)
 
         # LCRAT_1mon_risk = 1-(1-S2)^(1/(13*12))
-        self.LCRAT_1mon_risk = 1 - (1 - self.LCRAT_13yr_risk) ^ (1 / (13 * 12))
+        self.LCRAT_1mon_risk = 1 - (1 - self.LCRAT_13yr_risk) ** (1 / (13 * 12))
 
 
 def test_initiate_LCRAT_1mon_risk():
@@ -248,33 +240,27 @@ def test_initiate_LCRAT_1mon_risk():
         2,  # fam_lung_trend
         27,  # bmi
         5,  # edu6
-        # 50.4,  # pkyr_cat
-        # 0.000983915,  # LCRAT_1mon_risk
-        # 4  # ID
     )
-    p2.initiate_LCRAT_1mon_risk()
-
-    print(p2.LCRAT_1mon_risk)
-
-
-test_initiate_LCRAT_1mon_risk()
-
-
-def test():
     p1 = Person(
-        72,  # age
-        1,  # gender
-        42,  # smkyears
-        6,  # qtyears
-        24,  # cpd
-        2,  # race
+        66,  # age
+        0,  # gender
+        43,  # smkyears
+        0,  # qtyears
+        36,  # cpd
+        0,  # race
         0,  # emp
-        2,  # fam_lung_trend
-        27,  # bmi
-        5,  # edu6
-        50.4,  # pkyr_cat
-        0.000983915,  # LCRAT_1mon_risk
-        4  # ID
+        0,  # fam_lung_trend
+        23,  # bmi
+        3,  # edu6
     )
-    print(p1.age)
-    print(p1.gender)
+    basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
+    basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
+    basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
+    model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
+    model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
+
+    p1.initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
+
+    print(p1.LCRAT_1mon_risk)
+
+# test_initiate_LCRAT_1mon_risk()
