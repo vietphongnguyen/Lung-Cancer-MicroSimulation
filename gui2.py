@@ -1,3 +1,5 @@
+from tkinter.ttk import Progressbar, Style
+
 from DropdownOptionMenu import DropdownOptionMenu
 from person import Person, get_model_coef_from_file, get_basehaz_from_file
 from read_LC_table_from_file import read_LC_table_from_file
@@ -14,8 +16,74 @@ except ImportError:
     # Python3
     import tkinter as tk
 
+old_age_choice = None
+old_gender_choices = None
+old_smk_years_choices = None
+old_qt_years_choices = None
+old_cpd_choices = None
+old_race_choices = None
+old_emp_choices = None
+old_flt_choices = None
+old_bmi_entry = None
+old_edu6_choices = None
+
+
+def state_not_changing():
+    if int(age_menu.tk_var.get()) != old_age_choice:
+        return False
+    if gender_choices.index(gender_menu.tk_var.get()) != old_gender_choices:
+        return False
+    if smk_years_choices.index(smk_years_menu.tk_var.get()) != old_smk_years_choices:
+        return False
+    if qt_years_choices.index(qt_years_menu.tk_var.get()) != old_qt_years_choices:
+        return False
+    if cpd_choices.index(cpd_menu.tk_var.get()) != old_cpd_choices:
+        return False
+    if race_choices.index(race_menu.tk_var.get()) != old_race_choices:
+        return False
+    if emp_choices.index(emp_menu.tk_var.get()) != old_emp_choices:
+        return False
+    if flt_choices.index(flt_menu.tk_var.get()) != old_flt_choices:
+        return False
+    if float(bmi_entry.get()) != old_bmi_entry:
+        return False
+    if edu6_choices.index(edu6_menu.tk_var.get()) != old_edu6_choices:
+        return False
+
+    return True
+
+
+def set_new_changing_state(p):
+    global old_age_choice
+    global old_gender_choices
+    global old_smk_years_choices
+    global old_qt_years_choices
+    global old_cpd_choices
+    global old_race_choices
+    global old_emp_choices
+    global old_flt_choices
+    global old_bmi_entry
+    global old_edu6_choices
+
+    old_age_choice = p.age
+    old_gender_choices = p.gender
+    old_smk_years_choices = p.smkyears
+    old_qt_years_choices = p.qtyears
+    old_cpd_choices = p.cpd
+    old_race_choices = p.race
+    old_emp_choices = p.emp
+    old_flt_choices = p.fam_lung_trend
+    old_bmi_entry = p.bmi
+    old_edu6_choices = p.edu6
+
 
 def go():
+    if state_not_changing():
+        return
+
+    # disable GO button after it is already clicked
+    go_button['state'] = 'disabled'
+
     output_text.insert(tk.END, "Start Analyzing Model... \n"
                        + "Age:" + age_menu.tk_var.get()
                        + " | Gender:" + gender_menu.tk_var.get()
@@ -56,10 +124,16 @@ def go():
 
     p1.initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
 
-    years_remain = get_years_remain(p1, life_table, local_cancer, regional_cancer, distant_cancer, False)
+    years_remain = get_years_remain(p1, life_table, local_cancer, regional_cancer, distant_cancer, progress, root,
+                                    False)
 
     output_text.insert(tk.END, "Life years remain: " + str(years_remain) + " \n ---------------------------- \n")
     output_text.see(tk.END)
+
+    set_new_changing_state(p1)
+
+    # enable GO button after done processing
+    go_button['state'] = 'normal'
 
 
 def process_people_list():
@@ -125,7 +199,7 @@ menu_bar.add_cascade(label="Help", menu=help_menu)
 
 root.config(menu=menu_bar)
 
-HEIGHT = 600
+HEIGHT = 700
 WIDTH = 1550
 root.title("Lung Cancer MicroSimulation Analytic Model")
 root.iconbitmap('./images/lung_cancer1_icon.ico')
@@ -143,9 +217,20 @@ root.attributes('-alpha', 1)  # Set the transparent application so that we can s
 frame1 = tk.Frame(root, bg="#5fb7fa")
 frame1.place(relx=0.005, rely=0.01, relwidth=0.99, relheight=0.49)
 frame2 = tk.Frame(root, bg="#5fb7fa")
-frame2.place(relx=0.005, rely=0.51, relwidth=0.19, relheight=0.48)
+frame2.place(relx=0.005, rely=0.51, relwidth=0.19, relheight=0.45)
 frame3 = tk.Frame(root, bg="#5fb7fa", borderwidth=3)
-frame3.place(relx=0.20, rely=0.51, relwidth=0.795, relheight=0.48)
+frame3.place(relx=0.20, rely=0.51, relwidth=0.795, relheight=0.45)
+frame4_progress = tk.Frame(root, bg="#5fb7fa")
+frame4_progress.place(relx=0.005, rely=0.97, relwidth=0.99, relheight=0.02)
+
+# Progress bar widget
+s = Style()
+s.theme_use('default')  # ["clam", "alt", "default", "classic", {"aqua", "step"}]
+s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
+s.configure("green.Horizontal.TProgressbar", foreground='green', background='green')
+progress = Progressbar(frame4_progress, style="red.Horizontal.TProgressbar", orient=tk.HORIZONTAL, length=100,
+                       mode='determinate')
+progress.place(relx=0.0, rely=0.0, relwidth=1, relheight=1)
 
 # creating age label
 age_label = tk.Label(frame1, text="Age", bg="#5fb7fa").place(x=2, y=5)
@@ -208,7 +293,8 @@ edu6_menu = DropdownOptionMenu(frame1, 1420, 2, edu6_choices)
 
 # Creating a GO image button
 photo = tk.PhotoImage(file=r"./images/Go-button_100.png")
-tk.Button(frame2, text='Go !', image=photo, bg="#5fb7fa", borderwidth=0, command=go).pack()
+go_button = tk.Button(frame2, text='Go !', image=photo, bg="#5fb7fa", borderwidth=0, command=go)
+go_button.pack()
 
 # Checkbox
 var1 = tk.IntVar()

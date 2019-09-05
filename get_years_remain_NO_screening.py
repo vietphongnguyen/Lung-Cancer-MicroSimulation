@@ -5,7 +5,7 @@ from read_life_table_from_file import read_life_table_from_file
 from read_regional_cancer_table_from_file import read_regional_cancer_table_from_file
 
 
-def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_table, display_progress = True):
+def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_table, progress, root, display_progress=True):
     """ Returns the total years remain - NO screening """
     print("Getting Years Remain. Please wait ...", end="")
     remain = 0
@@ -23,12 +23,16 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
 
     running_age = float(p.age)  # running age will increase after every loop (+ 1 month) until it reaches 100 (dead)
 
-    total_month = (100 - p.age) * 12    # for calculating the remaining time
+    total_month = (100 - p.age) * 12  # for calculating the remaining time
     display_dot = 100
     unit = 0
     current_month = 1
-
+    progress['style'] = "red.Horizontal.TProgressbar"
     while running_age < 100:
+        # update the progress bar in gui2
+        progress['value'] = (running_age - 75) * 4
+        root.update_idletasks()
+
         if display_progress:
             if (current_month / total_month) > (unit / display_dot):
                 print('.', end='', flush=True)
@@ -128,6 +132,8 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
         running_age += 1 / 12  # increase age by a month
 
     print("done")
+    progress['style'] = "green.Horizontal.TProgressbar"
+    progress['value'] = progress["maximum"]
     return remain / 12  # remain increased every loop (every month). Have to return in years by dividing by 12
 
 
@@ -141,6 +147,5 @@ def test():
     p1 = Person(72, 1, 42, 6, 24, 2, 0, 2, 27, 5, 50.4, 0.000983915, 4)
     p2 = Person(80, 0, 0, 0, 0, 0, 0, 0, 24.62, 0)
     print(get_years_remain(p2, life_table1, local_cancer2, regional_cancer3, distant_cancer4, False))
-
 
 # test()
