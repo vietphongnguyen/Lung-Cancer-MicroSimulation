@@ -1,6 +1,8 @@
+from tkinter import messagebox
 from tkinter.ttk import Progressbar, Style
 
 from DropdownOptionMenu import DropdownOptionMenu
+from get_years_remain_screening import get_years_remain_screening
 from person import Person, get_model_coef_from_file, get_basehaz_from_file
 from read_LC_table_from_file import read_LC_table_from_file
 from read_distant_cancer_table_from_file import read_distant_cancer_table_from_file
@@ -45,6 +47,30 @@ old_emp_choices = None
 old_flt_choices = None
 old_bmi_entry = None
 old_edu6_choices = None
+
+
+def reset_old_value():
+    global old_age_choice
+    global old_gender_choices
+    global old_smk_years_choices
+    global old_qt_years_choices
+    global old_cpd_choices
+    global old_race_choices
+    global old_emp_choices
+    global old_flt_choices
+    global old_bmi_entry
+    global old_edu6_choices
+
+    old_age_choice = None
+    old_gender_choices = None
+    old_smk_years_choices = None
+    old_qt_years_choices = None
+    old_cpd_choices = None
+    old_race_choices = None
+    old_emp_choices = None
+    old_flt_choices = None
+    old_bmi_entry = None
+    old_edu6_choices = None
 
 
 def state_not_changing():
@@ -141,8 +167,11 @@ def run_model_for_1_person():
 
     years_remain = get_years_remain(p1, life_table, local_cancer, regional_cancer, distant_cancer, progress, root,
                                     False)
-
-    output_text.insert(tk.END, "Life years remain: " + str(years_remain) + " \n ---------------------------- \n")
+    years_remain_screening = get_years_remain_screening(p1, life_table, local_cancer, regional_cancer, distant_cancer,
+                                                        progress, root, False)
+    output_text.insert(tk.END, "Life years remain (NO Screening): " + str(years_remain)
+                       + "\nLife years remain (Screening): " + str(years_remain_screening)
+                       + " \n ---------------------------- \n")
     output_text.see(tk.END)
 
     set_new_changing_state(p1)
@@ -155,7 +184,7 @@ def run_model_for_list_of_people(filename):
     output_text.insert(tk.END, "Start Analyzing Model for the list of people in file [" + filename + "] ...\n")
 
     people_list = read_people_from_file(filename)
-    # print(people_list[0].ID)
+    output_text.insert(tk.END, "There are [" + str(len(people_list)) + "] people :\n")
 
     total_years_remain = 0
     for i in range(len(people_list)):
@@ -175,6 +204,30 @@ def donothing():
     x = 0
 
 
+def console_save_to_file():
+    text = output_text.get("1.0", tk.END)
+    if not text.strip():
+        return
+
+    # save text in the console to a file
+    import datetime
+    now = datetime.datetime.now()
+    f = open("output/console_" + now.strftime("%Y-%m-%d %Hh%Mm%Ss") + ".txt", "w+")
+    f.write(text)
+    f.close()
+    ask = messagebox.askyesno("Saved Successfully !",
+                              "The text in the console was successfully saved to file [output/console_"
+                              + now.strftime("%Y-%m-%d %Hh%Mm%Ss")
+                              + ".txt] \nDo you want to reset to a empty console ?")
+    if ask:
+        console_clear()
+
+
+def console_clear():
+    output_text.delete("1.0", tk.END)
+    reset_old_value()
+
+
 root = tk.Tk()
 
 # Creating the main menu bar
@@ -189,8 +242,8 @@ file_menu.add_command(label="Exit", command=root.quit)
 menu_bar.add_cascade(label="File", menu=file_menu)
 
 console_menu = tk.Menu(menu_bar, tearoff=0)
-console_menu.add_command(label="Clear", command=donothing)
-console_menu.add_command(label="Save to file", command=donothing)
+console_menu.add_command(label="Clear", command=console_clear)
+console_menu.add_command(label="Save to file", command=console_save_to_file)
 console_menu.add_separator()
 console_menu.add_command(label="Option", command=donothing)
 menu_bar.add_cascade(label="Console", menu=console_menu)
@@ -225,20 +278,21 @@ root.iconbitmap('./images/lung_cancer1_icon.ico')
 canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
 canvas.pack()
 try:
-    bg_image = tk.PhotoImage(file='./images/bg2.png')
+    bg_image = tk.PhotoImage(file='./images/bg3.png')
     bg_label = tk.Label(root, image=bg_image)
     bg_label.place(anchor='nw')
 except tk.TclError:
     print("cant read the ./images/bg2.png")
-root.attributes('-alpha', 1)  # Set the transparent application so that we can see the desktop background
+root.attributes('-alpha', 1)  # Set the transparent application (<1) so that we can see the desktop background
+root.geometry("+10+10")  # put the main window next to the upper left corner
 
 # layout the frames
 frame1 = tk.Frame(root, bg="#5fb7fa")
-frame1.place(relx=0.005, rely=0.01, relwidth=0.99, relheight=0.49)
+frame1.place(relx=0.005, rely=0.01, relwidth=0.99, relheight=0.29)
 frame2 = tk.Frame(root, bg="#5fb7fa")
-frame2.place(relx=0.005, rely=0.51, relwidth=0.19, relheight=0.45)
+frame2.place(relx=0.005, rely=0.31, relwidth=0.19, relheight=0.65)
 frame3 = tk.Frame(root, bg="#5fb7fa", borderwidth=3)
-frame3.place(relx=0.20, rely=0.51, relwidth=0.795, relheight=0.45)
+frame3.place(relx=0.20, rely=0.31, relwidth=0.795, relheight=0.65)
 frame4_progress = tk.Frame(root, bg="#5fb7fa")
 frame4_progress.place(relx=0.005, rely=0.97, relwidth=0.99, relheight=0.02)
 
