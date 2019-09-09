@@ -8,7 +8,7 @@ from read_regional_cancer_table_from_file import read_regional_cancer_table_from
 
 def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_table, progress=None, root=None, display_progress=True):
     """ Returns the total years remain - NO screening """
-    print("Getting Years Remain. Please wait ...", end="")
+    print("Peron [" + p.ID + "] : Getting Years Remain (No Screening). Please wait ...", end="")
     remain = 0
     disease_free = 1
     local_LC, regional_LC, distant_LC = [], [], []
