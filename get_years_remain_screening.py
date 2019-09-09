@@ -34,76 +34,76 @@ def get_years_remain_screening(p, life_table, LC_table, regional_LC_table, dista
         progress['style'] = "red.Horizontal.TProgressbar"
     except TypeError:
         pass
-    due_screen = 12     # initiate the due screen = 12 month so that they need to do screening immediately
-    sen = 0.6448        # sen : Sensitivity of CT = 0.6448 (From USPSTF's model)
+    due_screen = 12  # initiate the due screen = 12 month so that they need to do screening immediately
+    sen = 0.6448  # sen : Sensitivity of CT = 0.6448 (From USPSTF's model)
     first_screening = True  # first round of screening
-    p = 0.10540954      # p: Prob. of having an invasive procedure with or without a noninvasive procedure
-                        # p = 0.10540954 (Based on table 3, Aberle DR 2011)
-    q1 = 0.415          # q1	Prob of Chest Radiography after positive CT	0.415
-                        # (This is different for round of screening, but for now, we will use the value of round 0)
-    q2 = 0.67           # q2	Prob of Chest CT after positive CT	0.67
-    q3 = 0.633          # q3	Prob of FDG-PET or FDG-PET and CT after positive CT	0.633
+    p = 0.10540954  # p: Prob. of having an invasive procedure with or without a noninvasive procedure
+    # p = 0.10540954 (Based on table 3, Aberle DR 2011)
+    q1 = 0.415  # q1	Prob of Chest Radiography after positive CT	0.415
+    # (This is different for round of screening, but for now, we will use the value of round 0)
+    q2 = 0.67  # q2	Prob of Chest CT after positive CT	0.67
+    q3 = 0.633  # q3	Prob of FDG-PET or FDG-PET and CT after positive CT	0.633
     sum_q = q1 + q2 + q3  # because the sum q1+q2+q3 is greater than 100% -> We normalize the value of q. ??????
-    q1 /= sum_q         # For now, we just consider the patient will do only one of those tests (not combine):
-    q2 /= sum_q         # Chest Radiography, Chest CT, FDG-PET or FDG-PET and CT
+    q1 /= sum_q  # For now, we just consider the patient will do only one of those tests (not combine):
+    q2 /= sum_q  # Chest Radiography, Chest CT, FDG-PET or FDG-PET and CT
     q3 /= sum_q
 
-    m1 = 0.02173913     # m1	Prob of dying after noninvasive procedure	0.02173913
-    m2 = 0.02173913     # m2	Prob of dying after noninvasive procedure	0.02173913
-    m3 = 0.02173913     # m3	Prob of dying after noninvasive procedure	0.02173913
+    m1 = 0.02173913  # m1	Prob of dying after noninvasive procedure	0.02173913
+    m2 = 0.02173913  # m2	Prob of dying after noninvasive procedure	0.02173913
+    m3 = 0.02173913  # m3	Prob of dying after noninvasive procedure	0.02173913
 
     # s1	Prob of complications after noninvasive procedure	0.1304
     # s2	Prob of complications after noninvasive procedure	0.1304
     # s3	Prob of complications after noninvasive procedure	0.1304
     s123 = 0.1304
 
-    k = 0.67        # k	Proportion of local cancers given positive screening	0.67
-    l = 0.12        # l	Proportion of regional cancers given positive screening	0.12
+    k = 0.67  # k	Proportion of local cancers given positive screening	0.67
+    l = 0.12  # l	Proportion of regional cancers given positive screening	0.12
 
-    q4 = 0.363      # q4	Prob of Percutaneous cytologic analysis or biopsy after postive CT	0.363
-    q5 = 0.585      # q5	Prob of Bronchoscopy after postive CT	0.585
-    q6 = 0.178      # q6	Prob of Mediastinoscopy or mediastinotomy after postive CT	0.178
-    q7 = 0.163      # q7	Prob of Thoracoscopy after postive CT	0.163
-    q8 = 0.578      # q8	Prob of Thoracotomy after postive CT	0.578
+    q4 = 0.363  # q4	Prob of Percutaneous cytologic analysis or biopsy after postive CT	0.363
+    q5 = 0.585  # q5	Prob of Bronchoscopy after postive CT	0.585
+    q6 = 0.178  # q6	Prob of Mediastinoscopy or mediastinotomy after postive CT	0.178
+    q7 = 0.163  # q7	Prob of Thoracoscopy after postive CT	0.163
+    q8 = 0.578  # q8	Prob of Thoracotomy after postive CT	0.578
     sum_q = q4 + q5 + q6 + q7 + q8  # because the sum q4-8 is greater than 100% -> We normalize the value of q. ??????
-    q4 /= sum_q     # For now, we just consider the patient will do only one of those tests (not combine):
-    q5 /= sum_q     # Percutaneous, Bronchoscopy, Mediastinoscopy, Thoracoscopy, Thoracotomy
+    q4 /= sum_q  # For now, we just consider the patient will do only one of those tests (not combine):
+    q5 /= sum_q  # Percutaneous, Bronchoscopy, Mediastinoscopy, Thoracoscopy, Thoracotomy
     q6 /= sum_q
     q7 /= sum_q
     q8 /= sum_q
 
-    m4 = 0.032258065    # m4	Prob of dying after percutaneous cytologic analysis or biopsy	0.032258065
-    m5 = 0.073770492    # m5	Prob of dying after bronchoscopy	0.073770492
+    m4 = 0.032258065  # m4	Prob of dying after percutaneous cytologic analysis or biopsy	0.032258065
+    m5 = 0.073770492  # m5	Prob of dying after bronchoscopy	0.073770492
     m678 = 0.012893983  # m6	Prob of dying after thoracoscopy/thoracotomy or mediastinoscopy/mediastinotomy	0.012893983
-                        # m7	Prob of dying after thoracoscopy/thoracotomy or mediastinoscopy/mediastinotomy	0.012893983
-                        # m8	Prob of dying after thoracoscopy/thoracotomy or mediastinoscopy/mediastinotomy	0.012893983
+    # m7	Prob of dying after thoracoscopy/thoracotomy or mediastinoscopy/mediastinotomy	0.012893983
+    # m8	Prob of dying after thoracoscopy/thoracotomy or mediastinoscopy/mediastinotomy	0.012893983
 
-    s4 = 0.129      # s4	Prob of complications after percutaneous cytologic analysis or biopsy	0.129
-    s5 = 0.0902     # s5	Prob of complications after bronchoscopy	0.0902
+    s4 = 0.129  # s4	Prob of complications after percutaneous cytologic analysis or biopsy	0.129
+    s5 = 0.0902  # s5	Prob of complications after bronchoscopy	0.0902
     # s6	Prob of complications after thoracoscopy/thoracotomy or mediastinoscopy/mediastinotomy	0.3209
     # s7	Prob of complications after thoracoscopy/thoracotomy or mediastinoscopy/mediastinotomy	0.3209
     # s8	Prob of complications after thoracoscopy/thoracotomy or mediastinoscopy/mediastinotomy	0.3209
     s678 = 0.3209
 
-    ii = 0.20       # ii	Proportion of local cancers given negative screening	0.20
-    jj = 0.14       # jj	Proportion of regional cancers given negative screening	0.14
+    ii = 0.20  # ii	Proportion of local cancers given negative screening	0.20
+    jj = 0.14  # jj	Proportion of regional cancers given negative screening	0.14
 
-    spec = 0.734    # spec	Specificity of CT	0.734
+    spec = 0.734  # spec	Specificity of CT	0.734
 
-    q1_2 = 0.192    # q1_2	Prob of Chest Radiography after negative CT	0.192
+    q1_2 = 0.192  # q1_2	Prob of Chest Radiography after negative CT	0.192
     # This is different for round of screening, but for now, we will use the value of round 0
-    q2_2 = 0.815    # q2_2	Prob of Chest CT after negative CT	0.815
-    q3_2 = 0.091    # q3_2	Prob of FDG-PET or FDG-PET and CT after negative CT	0.091
+    q2_2 = 0.815  # q2_2	Prob of Chest CT after negative CT	0.815
+    q3_2 = 0.091  # q3_2	Prob of FDG-PET or FDG-PET and CT after negative CT	0.091
     sum_q = q1_2 + q2_2 + q3_2  # because the sum q1+q2+q3 is greater than 100% -> We normalize the value of q. ??????
     q1_2 /= sum_q  # For now, we just consider the patient will do only one of those tests (not combine):
     q2_2 /= sum_q  # Chest Radiography, Chest CT, FDG-PET or FDG-PET and CT
     q3_2 /= sum_q
 
-    q4_2 = 0.009    # q4_2	Prob of Percutaneous cytologic analysis or biopsy after negative CT	0.009
-    q5_2 = 0.024    # q5_2	Prob of Bronchoscopy after negative CT	0.024
-    q6_2 = 0.002    # q6_2	Prob of Mediastinoscopy or mediastinotomy after negative CT	0.002
-    q7_2 = 0.006    # q7_2	Prob of Thoracoscopy after negative CT	0.006
-    q8_2 = 0.007    # q8_2	Prob of Thoracotomy after negative CT	0.007
+    q4_2 = 0.009  # q4_2	Prob of Percutaneous cytologic analysis or biopsy after negative CT	0.009
+    q5_2 = 0.024  # q5_2	Prob of Bronchoscopy after negative CT	0.024
+    q6_2 = 0.002  # q6_2	Prob of Mediastinoscopy or mediastinotomy after negative CT	0.002
+    q7_2 = 0.006  # q7_2	Prob of Thoracoscopy after negative CT	0.006
+    q8_2 = 0.007  # q8_2	Prob of Thoracotomy after negative CT	0.007
     sum_q = q4_2 + q5_2 + q6_2 + q7_2 + q8_2  # because the sum q4-8 is greater than 100% -> We normalize the value of q. ??????
     q4_2 /= sum_q  # For now, we just consider the patient will do only one of those tests (not combine):
     q5_2 /= sum_q  # Percutaneous, Bronchoscopy, Mediastinoscopy, Thoracoscopy, Thoracotomy
@@ -194,8 +194,8 @@ def get_years_remain_screening(p, life_table, LC_table, regional_LC_table, dista
             chest_radiography_no_complications_local_LC = chest_radiography_no_complications * k
             chest_radiography_no_complications_regional_LC = chest_radiography_no_complications * l
             chest_radiography_no_complications_distant_LC = chest_radiography_no_complications \
-                                                         - chest_radiography_no_complications_local_LC \
-                                                         - chest_radiography_no_complications_regional_LC
+                                                            - chest_radiography_no_complications_local_LC \
+                                                            - chest_radiography_no_complications_regional_LC
 
             chest_CT_die_after_procedure = chest_CT * m2
             chest_CT_survive = chest_CT - chest_CT_die_after_procedure
@@ -204,13 +204,13 @@ def get_years_remain_screening(p, life_table, LC_table, regional_LC_table, dista
             chest_CT_complications_local_LC = chest_CT_complications * k
             chest_CT_complications_regional_LC = chest_CT_complications * l
             chest_CT_complications_distant_LC = chest_CT_complications \
-                                                         - chest_CT_complications_local_LC \
-                                                         - chest_CT_complications_regional_LC
+                                                - chest_CT_complications_local_LC \
+                                                - chest_CT_complications_regional_LC
             chest_CT_no_complications_local_LC = chest_CT_no_complications * k
             chest_CT_no_complications_regional_LC = chest_CT_no_complications * l
             chest_CT_no_complications_distant_LC = chest_CT_no_complications \
-                                                            - chest_CT_no_complications_local_LC \
-                                                            - chest_CT_no_complications_regional_LC
+                                                   - chest_CT_no_complications_local_LC \
+                                                   - chest_CT_no_complications_regional_LC
 
             PET_and_CT_die_after_procedure = PET_and_CT * m3
             PET_and_CT_survive = PET_and_CT - PET_and_CT_die_after_procedure
@@ -219,13 +219,13 @@ def get_years_remain_screening(p, life_table, LC_table, regional_LC_table, dista
             PET_and_CT_complications_local_LC = PET_and_CT_complications * k
             PET_and_CT_complications_regional_LC = PET_and_CT_complications * l
             PET_and_CT_complications_distant_LC = PET_and_CT_complications \
-                                                - PET_and_CT_complications_local_LC \
-                                                - PET_and_CT_complications_regional_LC
+                                                  - PET_and_CT_complications_local_LC \
+                                                  - PET_and_CT_complications_regional_LC
             PET_and_CT_no_complications_local_LC = PET_and_CT_no_complications * k
             PET_and_CT_no_complications_regional_LC = PET_and_CT_no_complications * l
             PET_and_CT_no_complications_distant_LC = PET_and_CT_no_complications \
-                                                   - PET_and_CT_no_complications_local_LC \
-                                                   - PET_and_CT_no_complications_regional_LC
+                                                     - PET_and_CT_no_complications_local_LC \
+                                                     - PET_and_CT_no_complications_regional_LC
 
             percutaneous = invasive_procedure * q4
             bronchoscopy = invasive_procedure * q5
@@ -240,13 +240,13 @@ def get_years_remain_screening(p, life_table, LC_table, regional_LC_table, dista
             percutaneous_complications_local_LC = percutaneous_complications * k
             percutaneous_complications_regional_LC = percutaneous_complications * l
             percutaneous_complications_distant_LC = percutaneous_complications \
-                                                         - percutaneous_complications_local_LC \
-                                                         - percutaneous_complications_regional_LC
+                                                    - percutaneous_complications_local_LC \
+                                                    - percutaneous_complications_regional_LC
             percutaneous_no_complications_local_LC = percutaneous_no_complications * k
             percutaneous_no_complications_regional_LC = percutaneous_no_complications * l
             percutaneous_no_complications_distant_LC = percutaneous_no_complications \
-                                                            - percutaneous_no_complications_local_LC \
-                                                            - percutaneous_no_complications_regional_LC
+                                                       - percutaneous_no_complications_local_LC \
+                                                       - percutaneous_no_complications_regional_LC
 
             bronchoscopy_die_after_procedure = bronchoscopy * m5
             bronchoscopy_survive = bronchoscopy - bronchoscopy_die_after_procedure
@@ -270,13 +270,13 @@ def get_years_remain_screening(p, life_table, LC_table, regional_LC_table, dista
             mediastinoscopy_complications_local_LC = mediastinoscopy_complications * k
             mediastinoscopy_complications_regional_LC = mediastinoscopy_complications * l
             mediastinoscopy_complications_distant_LC = mediastinoscopy_complications \
-                                                    - mediastinoscopy_complications_local_LC \
-                                                    - mediastinoscopy_complications_regional_LC
+                                                       - mediastinoscopy_complications_local_LC \
+                                                       - mediastinoscopy_complications_regional_LC
             mediastinoscopy_no_complications_local_LC = mediastinoscopy_no_complications * k
             mediastinoscopy_no_complications_regional_LC = mediastinoscopy_no_complications * l
             mediastinoscopy_no_complications_distant_LC = mediastinoscopy_no_complications \
-                                                       - mediastinoscopy_no_complications_local_LC \
-                                                       - mediastinoscopy_no_complications_regional_LC
+                                                          - mediastinoscopy_no_complications_local_LC \
+                                                          - mediastinoscopy_no_complications_regional_LC
 
             thoracoscopy_die_after_procedure = thoracoscopy * m678
             thoracoscopy_survive = thoracoscopy - thoracoscopy_die_after_procedure
@@ -300,13 +300,13 @@ def get_years_remain_screening(p, life_table, LC_table, regional_LC_table, dista
             thoracotomy_complications_local_LC = thoracotomy_complications * k
             thoracotomy_complications_regional_LC = thoracotomy_complications * l
             thoracotomy_complications_distant_LC = thoracotomy_complications \
-                                                    - thoracotomy_complications_local_LC \
-                                                    - thoracotomy_complications_regional_LC
+                                                   - thoracotomy_complications_local_LC \
+                                                   - thoracotomy_complications_regional_LC
             thoracotomy_no_complications_local_LC = thoracotomy_no_complications * k
             thoracotomy_no_complications_regional_LC = thoracotomy_no_complications * l
             thoracotomy_no_complications_distant_LC = thoracotomy_no_complications \
-                                                       - thoracotomy_no_complications_local_LC \
-                                                       - thoracotomy_no_complications_regional_LC
+                                                      - thoracotomy_no_complications_local_LC \
+                                                      - thoracotomy_no_complications_regional_LC
 
             no_follow_up_local_LC = no_follow_up * k
             no_follow_up_regional_LC = no_follow_up * l
@@ -320,7 +320,7 @@ def get_years_remain_screening(p, life_table, LC_table, regional_LC_table, dista
 
             # No_LC : CT (-) = spec
             No_LC_CT_false = disease_free_survive_No_LC * spec
-            No_LC_CT_true = disease_free_survive_No_LC - No_LC_CT_false     # CT (+)
+            No_LC_CT_true = disease_free_survive_No_LC - No_LC_CT_false  # CT (+)
 
             diagnostic_follow_up = No_LC_CT_true * n
             no_follow_up = No_LC_CT_true - diagnostic_follow_up
@@ -336,23 +336,70 @@ def get_years_remain_screening(p, life_table, LC_table, regional_LC_table, dista
             chest_radiography_complications = chest_radiography_survive * s123_2
             chest_radiography_no_complications = chest_radiography_survive - chest_radiography_complications
 
+            chest_CT_die_after_procedure = chest_CT * m123_2
+            chest_CT_survive = chest_CT - chest_CT_die_after_procedure
+            chest_CT_complications = chest_CT_survive * s123_2
+            chest_CT_no_complications = chest_CT_survive - chest_CT_complications
 
+            PET_and_CT_die_after_procedure = PET_and_CT * m123_2
+            PET_and_CT_survive = PET_and_CT - PET_and_CT_die_after_procedure
+            PET_and_CT_complications = PET_and_CT_survive * s123_2
+            PET_and_CT_no_complications = PET_and_CT_survive - PET_and_CT_complications
+
+            percutaneous = invasive_procedure * q4_2
+            bronchoscopy = invasive_procedure * q5_2
+            mediastinoscopy = invasive_procedure * q6_2
+            thoracoscopy = invasive_procedure * q7_2
+            thoracotomy = invasive_procedure * q8_2
+
+            # m4_2 = 0
+            # percutaneous_die_after_procedure = percutaneous * m4_2
+            # percutaneous_survive = percutaneous - percutaneous_die_after_procedure
+            # s4_2 = 0
+            # percutaneous_complications = percutaneous_survive * s4_2
+            # percutaneous_no_complications = percutaneous_survive - percutaneous_complications
+
+            bronchoscopy_die_after_procedure = bronchoscopy * m5_2
+            bronchoscopy_survive = bronchoscopy - bronchoscopy_die_after_procedure
+            # s5_2 = 0
+            # bronchoscopy_complications = bronchoscopy_survive * s5_2
+            # bronchoscopy_no_complications = bronchoscopy_survive - bronchoscopy_complications
+
+            mediastinoscopy_die_after_procedure = mediastinoscopy * m678_2
+            mediastinoscopy_survive = mediastinoscopy - mediastinoscopy_die_after_procedure
+            mediastinoscopy_complications = mediastinoscopy_survive * s678_2
+            mediastinoscopy_no_complications = mediastinoscopy_survive - mediastinoscopy_complications
+
+            thoracoscopy_die_after_procedure = thoracoscopy * m678_2
+            thoracoscopy_survive = thoracoscopy - thoracoscopy_die_after_procedure
+            thoracoscopy_complications = thoracoscopy_survive * s678_2
+            thoracoscopy_no_complications = thoracoscopy_survive - thoracoscopy_complications
+
+            thoracotomy_die_after_procedure = thoracotomy * m678_2
+            thoracotomy_survive = thoracotomy - thoracotomy_die_after_procedure
+            thoracotomy_complications = thoracotomy_survive * s678_2
+            thoracotomy_no_complications = thoracotomy_survive - thoracotomy_complications
+
+            # Sum up for the next loop
+            disease_free = disease_free_survive_No_LC - chest_radiography_die_after_procedure \
+                           - chest_CT_die_after_procedure - PET_and_CT_die_after_procedure \
+                           - bronchoscopy_die_after_procedure - mediastinoscopy_die_after_procedure \
+                           - thoracoscopy_die_after_procedure - thoracotomy_die_after_procedure
 
             due_screen = 0
 
-        else:   # not screen (undue)
+        else:  # not screen (undue)
             due_screen += 1
-            LC = b
-            no_LC = 1 - b
-            LC_local_LC = LC * c
-            LC_regional_LC = LC * d
-            LC_distant_LC = LC - LC_local_LC - LC_regional_LC
+            LC_local_LC = disease_free_survive_LC * c
+            LC_regional_LC = disease_free_survive_LC * d
+            LC_distant_LC = disease_free_survive_LC - LC_local_LC - LC_regional_LC
 
-        # Sum up for the next loop
-        disease_free = disease_free_survive_No_LC
-        local_LC.append([disease_free_survive_LC_local_LC, 0])  # add local_LC with interval = 0 month
-        regional_LC.append([disease_free_survive_LC_regional_LC, 0])
-        distant_LC.append([disease_free_survive_LC_distant_LC, 0])
+            local_LC.append([LC_local_LC, 0])  # add local_LC with interval = 0 month
+            regional_LC.append([LC_regional_LC, 0])
+            distant_LC.append([LC_distant_LC, 0])
+
+            # Sum up for the next loop
+            disease_free = disease_free_survive_No_LC
 
         # local_LC
         for i in range(len(local_LC)):
