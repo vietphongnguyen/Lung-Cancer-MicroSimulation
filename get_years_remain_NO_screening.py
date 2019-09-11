@@ -6,12 +6,14 @@ from read_people_from_file import read_people_from_file
 from read_regional_cancer_table_from_file import read_regional_cancer_table_from_file
 
 
-def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_table, progress=None, root=None, display_progress=True):
+def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_table, progress=None, root=None,
+                     display_progress=True):
     """ Returns the total years remain - NO screening """
     print("Person [" + str(p.ID) + "] : Getting Years Remain (No Screening). Please wait ...", end="")
     remain = 0
     disease_free = 1
-    local_LC, regional_LC, distant_LC = [], [], []
+    local_LC, regional_LC, distant_LC = [], [], []  # = [number of Lung Cancer, infected months]
+
     death_LC, death_other_causes = 0, 0
 
     # when calculating the a_column for constant a value: p.race consider =3 for all other races
@@ -146,7 +148,9 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
     except TypeError:
         pass
 
-    return remain / 12  # remain increased every loop (every month). Have to return in years by dividing by 12
+    return [remain / 12  # remain increased every loop (every month). Have to return in years by dividing by 12
+        , disease_free, local_LC, regional_LC, distant_LC, death_other_causes
+            ]
 
 
 def test():
@@ -159,6 +163,7 @@ def test():
     p1 = Person(72, 1, 42, 6, 24, 2, 0, 2, 27, 5, 50.4, 0.000983915, 4)
     p2 = Person(80, 0, 0, 0, 0, 0, 0, 0, 24.62, 0)
     print(get_years_remain(p2, life_table1, local_cancer2, regional_cancer3, distant_cancer4, False))
+
 
 def test2():
     # init reading data table
@@ -187,6 +192,5 @@ def test2():
 
     print("\n ------------------------ \nTotal life years remain: " + str(total_years_remain) + " \n")
     print("Average life years per person: " + str(total_years_remain / len(people_list)) + " \n ----------------- \n")
-
 
 # test2()

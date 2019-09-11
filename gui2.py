@@ -98,8 +98,10 @@ def set_new_changing_state(p):
 
 
 def go():
+    global LC_result
+
     if one_person_var.get():
-        run_model_for_1_person()
+        LC_result = run_model_for_1_person()
 
     if list_people_var.get():
         # read data from "lcrisk_tool.xlsx" file
@@ -142,9 +144,10 @@ def run_model_for_1_person():
 
     years_remain = get_years_remain(p1, life_table, local_cancer, regional_cancer, distant_cancer, progress, root,
                                     False)
+
     # years_remain_screening = get_years_remain_screening(p1, life_table, local_cancer, regional_cancer, distant_cancer,
     #                                                     progress, root, False)
-    output_text.insert(tk.END, "Life years remain (NO Screening): " + str(years_remain)
+    output_text.insert(tk.END, "Life years remain (NO Screening): " + str(years_remain[0])
                        # + "\nLife years remain (Screening): " + str(years_remain_screening)
                        + " \n ---------------------------- \n")
     output_text.see(tk.END)
@@ -153,6 +156,7 @@ def run_model_for_1_person():
 
     # enable GO button after done processing
     go_button['state'] = 'normal'
+    return [p1, years_remain]
 
 
 def run_model_for_list_of_people(filename):
@@ -208,10 +212,12 @@ def console_clear():
     reset_old_value()
 
 
+LC_result = None
+
+
 def show_LC_model_no_screening():
     window = tk.Toplevel(root)
-    window_LC_model_no_screening = SimulateLCModelNoScreening(window)
-
+    window_LC_model_no_screening = SimulateLCModelNoScreening(window, LC_result)
 
 
 menu_bar = tk.Menu(root)
