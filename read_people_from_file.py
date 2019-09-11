@@ -1,5 +1,5 @@
 import xlrd
-from person import Person
+from Person import Person
 
 
 def read_people_from_file(file_name):

@@ -1,4 +1,4 @@
-from person import Person, get_basehaz_from_file, get_model_coef_from_file
+from Person import Person, get_basehaz_from_file, get_model_coef_from_file
 from read_LC_table_from_file import read_LC_table_from_file
 from read_distant_cancer_table_from_file import read_distant_cancer_table_from_file
 from read_life_table_from_file import read_life_table_from_file
@@ -417,7 +417,8 @@ def get_years_remain_screening(p, life_table, LC_table, regional_LC_table, dista
                 interval = local_LC[i][1] - 1
                 if interval > 119: interval = 119
                 age = int(running_age / 10 - 4)
-                if age > 4: age = 4
+                if age > 4:
+                    age = 4
                 # print(interval, p.gender, p.race, age)
                 e = 1 - LC_table[interval][p.gender][p.race][age] * (1 - a)
                 local_LC_survive_distant_LC = local_LC_survive * e

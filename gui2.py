@@ -2,8 +2,9 @@ from tkinter import messagebox
 from tkinter.ttk import Progressbar, Style
 
 from DropdownOptionMenu import DropdownOptionMenu
+from SimulateLCModelNoScreening import SimulateLCModelNoScreening
 from get_years_remain_screening import get_years_remain_screening
-from person import Person, get_model_coef_from_file, get_basehaz_from_file
+from Person import Person, get_model_coef_from_file, get_basehaz_from_file
 from read_LC_table_from_file import read_LC_table_from_file
 from read_distant_cancer_table_from_file import read_distant_cancer_table_from_file
 from read_life_table_from_file import read_life_table_from_file
@@ -50,16 +51,8 @@ old_edu6_choices = None
 
 
 def reset_old_value():
-    global old_age_choice
-    global old_gender_choices
-    global old_smk_years_choices
-    global old_qt_years_choices
-    global old_cpd_choices
-    global old_race_choices
-    global old_emp_choices
-    global old_flt_choices
-    global old_bmi_entry
-    global old_edu6_choices
+    global old_age_choice, old_gender_choices, old_smk_years_choices, old_qt_years_choices, old_cpd_choices, \
+        old_race_choices, old_emp_choices, old_flt_choices, old_bmi_entry, old_edu6_choices
 
     old_age_choice = None
     old_gender_choices = None
@@ -74,41 +67,23 @@ def reset_old_value():
 
 
 def state_not_changing():
-    if int(age_menu.tk_var.get()) != old_age_choice:
+    if int(age_menu.tk_var.get()) != old_age_choice \
+            or gender_choices.index(gender_menu.tk_var.get()) != old_gender_choices \
+            or smk_years_choices.index(smk_years_menu.tk_var.get()) != old_smk_years_choices \
+            or qt_years_choices.index(qt_years_menu.tk_var.get()) != old_qt_years_choices \
+            or cpd_choices.index(cpd_menu.tk_var.get()) != old_cpd_choices \
+            or race_choices.index(race_menu.tk_var.get()) != old_race_choices \
+            or emp_choices.index(emp_menu.tk_var.get()) != old_emp_choices \
+            or flt_choices.index(flt_menu.tk_var.get()) != old_flt_choices \
+            or float(bmi_entry.get()) != old_bmi_entry \
+            or edu6_choices.index(edu6_menu.tk_var.get()) != old_edu6_choices:
         return False
-    if gender_choices.index(gender_menu.tk_var.get()) != old_gender_choices:
-        return False
-    if smk_years_choices.index(smk_years_menu.tk_var.get()) != old_smk_years_choices:
-        return False
-    if qt_years_choices.index(qt_years_menu.tk_var.get()) != old_qt_years_choices:
-        return False
-    if cpd_choices.index(cpd_menu.tk_var.get()) != old_cpd_choices:
-        return False
-    if race_choices.index(race_menu.tk_var.get()) != old_race_choices:
-        return False
-    if emp_choices.index(emp_menu.tk_var.get()) != old_emp_choices:
-        return False
-    if flt_choices.index(flt_menu.tk_var.get()) != old_flt_choices:
-        return False
-    if float(bmi_entry.get()) != old_bmi_entry:
-        return False
-    if edu6_choices.index(edu6_menu.tk_var.get()) != old_edu6_choices:
-        return False
-
     return True
 
 
 def set_new_changing_state(p):
-    global old_age_choice
-    global old_gender_choices
-    global old_smk_years_choices
-    global old_qt_years_choices
-    global old_cpd_choices
-    global old_race_choices
-    global old_emp_choices
-    global old_flt_choices
-    global old_bmi_entry
-    global old_edu6_choices
+    global old_age_choice, old_gender_choices, old_smk_years_choices, old_qt_years_choices, old_cpd_choices, \
+        old_race_choices, old_emp_choices, old_flt_choices, old_bmi_entry, old_edu6_choices
 
     old_age_choice = p.age
     old_gender_choices = p.gender
@@ -167,10 +142,10 @@ def run_model_for_1_person():
 
     years_remain = get_years_remain(p1, life_table, local_cancer, regional_cancer, distant_cancer, progress, root,
                                     False)
-    years_remain_screening = get_years_remain_screening(p1, life_table, local_cancer, regional_cancer, distant_cancer,
-                                                        progress, root, False)
+    # years_remain_screening = get_years_remain_screening(p1, life_table, local_cancer, regional_cancer, distant_cancer,
+    #                                                     progress, root, False)
     output_text.insert(tk.END, "Life years remain (NO Screening): " + str(years_remain)
-                       + "\nLife years remain (Screening): " + str(years_remain_screening)
+                       # + "\nLife years remain (Screening): " + str(years_remain_screening)
                        + " \n ---------------------------- \n")
     output_text.see(tk.END)
 
@@ -200,6 +175,11 @@ def run_model_for_list_of_people(filename):
     output_text.insert(tk.END, " ---------------------------- \n")
 
 
+root = tk.Tk()
+
+
+###################################### Creating the main menu bar  ##################################################
+
 def donothing():
     x = 0
 
@@ -228,9 +208,12 @@ def console_clear():
     reset_old_value()
 
 
-root = tk.Tk()
+def show_LC_model_no_screening():
+    window = tk.Toplevel(root)
+    window_LC_model_no_screening = SimulateLCModelNoScreening(window)
 
-# Creating the main menu bar
+
+
 menu_bar = tk.Menu(root)
 
 file_menu = tk.Menu(menu_bar, tearoff=0)
@@ -256,6 +239,14 @@ menu_bar.add_cascade(label="Option", menu=option_menu)
 disease_menu = tk.Menu(menu_bar, tearoff=0)
 menu_bar.add_cascade(label="Disease", menu=disease_menu)
 
+simulation_menu = tk.Menu(menu_bar, tearoff=0)
+simulation_menu.add_command(label="Lung Cancer Risk Simulation Model (NO Screening)",
+                            command=show_LC_model_no_screening)
+simulation_menu.add_command(label="Save to file", command=donothing)
+simulation_menu.add_separator()
+simulation_menu.add_command(label="Option", command=donothing)
+menu_bar.add_cascade(label="Simulation", menu=simulation_menu)
+
 window_menu = tk.Menu(menu_bar, tearoff=0)
 menu_bar.add_cascade(label="Window", menu=window_menu)
 
@@ -270,6 +261,8 @@ help_menu.add_command(label="About...", command=donothing)
 menu_bar.add_cascade(label="Help", menu=help_menu)
 
 root.config(menu=menu_bar)
+
+###################################### End creating the main menu bar  #############################################
 
 HEIGHT = 700
 WIDTH = 1550
@@ -320,7 +313,7 @@ gender_menu = DropdownOptionMenu(frame1, 135, 2, gender_choices)
 # creating years smoked label
 smk_years_label = tk.Label(frame1, text="Smoking year", bg="#5fb7fa").place(x=220, y=5)
 smk_years_choices = ['0 ', '1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ', '8 ', '9 ', '10', '11', '12', '13', '14', '15']
-smk_years_menu = DropdownOptionMenu(frame1, 300, 2, smk_years_choices)
+smk_years_menu = DropdownOptionMenu(frame1, 300, 2, smk_years_choices, 1)
 
 # creating years quit label
 qt_years_label = tk.Label(frame1, text="Quit year", bg="#5fb7fa").place(x=355, y=5)
@@ -330,7 +323,7 @@ qt_years_menu = DropdownOptionMenu(frame1, 410, 2, qt_years_choices)
 # creating cigarettes per day label
 cpd_label = tk.Label(frame1, text="Cigarettes/day", bg="#5fb7fa").place(x=475, y=5)
 cpd_choices = ['0 ', '1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ', '8 ', '9 ', '10', '11', '12', '13', '14', '15']
-cpd_menu = DropdownOptionMenu(frame1, 560, 2, cpd_choices)
+cpd_menu = DropdownOptionMenu(frame1, 560, 2, cpd_choices, 5)
 
 # creating race label ((0=Non-hispanic white, 1=Non-hispanic Black/African American, 2=Hispanic,
 # 3=Non-Hispanic American Indian/Alaska Native, 4=Non-Hispanic Asian or Pacific Islander, 5=Non-Hispanic Unknown Race)
