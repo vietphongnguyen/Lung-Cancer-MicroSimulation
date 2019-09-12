@@ -60,6 +60,9 @@ class Person:
         self.LCRAT_1mon_risk = LCRAT_1mon_risk  # (Constant b) 1 month risk. Incidence of lung cancer by age, sex, race.
         # Lung cancer risk model-LCRAT
 
+        if LCRAT_1mon_risk != 0.000983915:
+            pass
+
     def initiate_LCRAT_1mon_risk(self, basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F):
 
         # LCRAT_RR = EXP(   calculator!C2*model_coef!$D$4

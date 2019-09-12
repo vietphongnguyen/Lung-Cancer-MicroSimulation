@@ -179,6 +179,10 @@ def run_model_for_list_of_people(filename):
     output_text.insert(tk.END, " ---------------------------- \n")
 
 
+def generate_excel_table():
+    pass
+
+
 root = tk.Tk()
 
 
@@ -380,6 +384,14 @@ tk.Checkbutton(frame2, text="Read the list of people data from", variable=list_p
 file_name_entry = tk.Entry(frame2, width=30)
 file_name_entry.insert(tk.END, 'lcrisk_tool.xlsx')
 file_name_entry.pack()
+
+# Button to generate excel table for every combination
+tk.Label(frame2, bg="#5fb7fa").pack()
+tk.Label(frame2, bg="#5fb7fa").pack()
+tk.Label(frame2, bg="#5fb7fa", fg="white", text="________________________________________").pack()
+tk.Label(frame2, bg="#5fb7fa").pack()
+tk.Label(frame2, bg="#5fb7fa").pack()
+tk.Button(frame2, text="Generate Excel Table For Every Combination", command=generate_excel_table).pack()
 
 output_label = tk.Label(frame3, bg="#5fb7fa", text='This is the output: ', anchor='nw', justify='left')
 output_label.pack()

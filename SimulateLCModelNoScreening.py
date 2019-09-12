@@ -2,10 +2,12 @@ import tkinter as tk
 
 
 def str_sum(local_LC):
-    sum = 0
+    s = 0.0
     for i in local_LC:
-        sum += i[0]
-    return str(sum)
+        s += i[0]
+    # s /= 12  # device by 12 to convert from months to years
+    return str("{:.20f}".format(s))
+
 
 class SimulateLCModelNoScreening:
     def __init__(self, window, LC_result):
@@ -37,11 +39,13 @@ class SimulateLCModelNoScreening:
         self.window = window
         HEIGHT = 800
         WIDTH = 1600
+        number_of_digit_display = 8
         self.window.title("Lung Cancer Risk Simulation Model - Years Remain Count (NO Screening)")
         self.window.iconbitmap('./images/lung_cancer1_icon.ico')
         # self.window.geometry("WIDTHxHEIGHT+0+0")
-        canvas = tk.Canvas(self.window, height=HEIGHT, width=WIDTH)
-        canvas.pack()
+        self.canvas = tk.Canvas(self.window, height=HEIGHT, width=WIDTH)
+        self.window.minsize(WIDTH, HEIGHT)
+        self.canvas.pack()
         try:
             path = './images/Lung cancer_2019-7-30_No Scanning1600x900 copy.png'
             bg_image = tk.PhotoImage(file=path)
@@ -52,47 +56,62 @@ class SimulateLCModelNoScreening:
             print("cant read the ./images/Lung cancer_2019-7-30_No Scanning1600x900 copy.png")
         self.window.geometry("+0+0")  # put the main window next to the upper left corner
 
-        close_button = tk.Button(self.window, text="Click Here to Close This Window", command=self.quit)
-        close_button.place(x=1250, y=600)
-
-        # Display the disease free number
-        tk.Label(self.window, text=str(disease_free)[:5]).place(x=225, y=157)   # , bg="green"
+        # add button to Close the Window
+        self.close_button = tk.Button(self.window, text="Click Here to Close This Window", command=self.quit)
+        self.close_button.place(x=1250, y=600)
 
         # Display the death other causes
-        tk.Label(self.window, text=str(death_other_causes)[:5]).place(x=1010, y=440)
+        tk.Label(self.window, text=str("{:.20f}".format(death_other_causes))[:number_of_digit_display],
+                 font=("Helvetica", 12)) \
+            .place(x=1010, y=430)
+
+        # Display the disease free number
+        tk.Label(self.window, text=str("{:.20f}".format(disease_free))[:number_of_digit_display], fg="green",
+                 font=("Helvetica", 12)) \
+            .place(x=205, y=157)
 
         # Display the Local LC
-        tk.Label(self.window, text=total_local_LC[:5]).place(x=225, y=295)
+        tk.Label(self.window, text=total_local_LC[:number_of_digit_display], fg="yellow", bg="black",
+                 font=("Helvetica", 12)) \
+            .place(x=205, y=295)
 
         # Display the Regional LC
-        tk.Label(self.window, text=total_regional_LC[:5]).place(x=225, y=397)
+        tk.Label(self.window, text=total_regional_LC[:number_of_digit_display], fg="orange", font=("Helvetica", 12)) \
+            .place(x=205, y=397)
 
         # Display the Distant LC
-        tk.Label(self.window, text=total_distant_LC[:5]).place(x=225, y=495)
+        tk.Label(self.window, text=total_distant_LC[:number_of_digit_display], fg="brown", font=("Helvetica", 12)) \
+            .place(x=205, y=495)
 
         # Display the Death LC
-        tk.Label(self.window, text=total_distant_LC[:5]).place(x=630, y=550)
+        tk.Label(self.window, text=total_distant_LC[:number_of_digit_display], font=("Helvetica", 12)) \
+            .place(x=610, y=550)
 
         # Display current age and life remain
         try:
             path = './images/current age pointer copy.png'
             pointer_image = tk.PhotoImage(file=path)
-            pointer_label = tk.Label(self.window, image=pointer_image)
-            pointer_label2 = tk.Label(self.window, image=pointer_image)
+            pointer_label = tk.Label(self.window, image=pointer_image, bd=0, highlightthickness=2)
+            pointer_label2 = tk.Label(self.window, image=pointer_image, bd=0, highlightthickness=2)
         except tk.TclError:
             print("cant read the ./images/current age pointer copy.png")
         x1 = int(1088 + (age - 50) * 9.505)
         x2 = int(x1 + years_remain * 9.505)
-        pointer_label.place(x=x1, y=383)
-        pointer_label2.place(x=x2, y=383)
-        tk.Label(self.window, text=str(age) + " + " + str(years_remain)[:6]).place(x=x1-8, y=412)
 
         # Draw the life remain bar
-        canvas.create_rectangle(x1, 383, x2, 383 + 5, outline="red", fill="red")
+        canvas = tk.Canvas(self.window, cursor='circle', height=5, width=x2 - x1, bg="red", bd=0, highlightthickness=0)
+        # "arrow"  "circle" "clock" "cross" "dotbox" "exchange" "fleur" "heart" "man" "mouse" "pirate" "plus" "shuttle"
+        # "sizing" "spider" "spraycan" "star" "target" "tcross" "trek" "watch"
+        canvas.place(x=x1 + 10, y=385)
+
+        # display the remaining year
+        pointer_label.place(x=x1, y=385)
+        # pointer_label2.place(x=x2, y=385)
+        tk.Label(self.window, text=str(age) + " + " + str("{:.20f}".format(years_remain))[:number_of_digit_display],
+                 fg="red", font=("Helvetica", 12)) \
+            .place(x=x1 - 20, y=412)
 
         self.window.mainloop()
 
     def quit(self):
         self.window.destroy()
-
-

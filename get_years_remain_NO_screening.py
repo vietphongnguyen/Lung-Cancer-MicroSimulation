@@ -1,4 +1,5 @@
 from Person import Person, get_model_coef_from_file, get_basehaz_from_file
+from SimulateLCModelNoScreening import str_sum
 from read_LC_table_from_file import read_LC_table_from_file
 from read_distant_cancer_table_from_file import read_distant_cancer_table_from_file
 from read_life_table_from_file import read_life_table_from_file
@@ -153,19 +154,43 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
             ]
 
 
-def test():
+def test_1_person():
     # init reading data table
     life_table1 = read_life_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
     local_cancer2 = read_LC_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
     regional_cancer3 = read_regional_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
     distant_cancer4 = read_distant_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
 
+    # initiate the basehaz and the model_coef array to calculate the LCRAT_1mon_risk
+    basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
+    basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
+    basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
+    model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
+    model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
+
+    # Person(age, gender, smkyears, qtyears, cpd, race, emp, fam_lung_trend, bmi, edu6)
     p1 = Person(72, 1, 42, 6, 24, 2, 0, 2, 27, 5, 50.4, 0.000983915, 4)
     p2 = Person(80, 0, 0, 0, 0, 0, 0, 0, 24.62, 0)
-    print(get_years_remain(p2, life_table1, local_cancer2, regional_cancer3, distant_cancer4, False))
+    p3 = Person(99, 0, 1, 0, 5, 0, 0, 0, 24.62, 0)
+
+    p3.initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
+
+    years_remain = get_years_remain(p3, life_table1, local_cancer2, regional_cancer3, distant_cancer4, None, None, True)
+
+    print("Remain : {}".format(years_remain[0]))
+    print("Disease_free : {}".format(years_remain[1]))
+    print("local_LC : {}".format(years_remain[2]))
+    print("         Sum : {}".format(str_sum(years_remain[2])))
+
+    print("regional_LC : {}".format(years_remain[3]))
+    print("distant_LC : {}".format(years_remain[4]))
+    print("death_other_causes : {}".format(years_remain[5]))
 
 
-def test2():
+# test_1_person()
+
+
+def test_read_people_from_file():
     # init reading data table
     life_table = read_life_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
     local_cancer = read_LC_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
@@ -193,4 +218,4 @@ def test2():
     print("\n ------------------------ \nTotal life years remain: " + str(total_years_remain) + " \n")
     print("Average life years per person: " + str(total_years_remain / len(people_list)) + " \n ----------------- \n")
 
-# test2()
+# test_read_people_from_file()
