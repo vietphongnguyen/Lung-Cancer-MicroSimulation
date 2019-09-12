@@ -1,3 +1,17 @@
+# python3
+
+"""
+In this class, I did ... Input variables are:
+
+
+example python code use:
+
+
+Author: Phong Nguyen (vietphong.nguyen@gmail.com)
+Last modified: SEP 2019
+"""
+
+
 from Person import Person, get_model_coef_from_file, get_basehaz_from_file
 from SimulateLCModelNoScreening import str_sum
 from read_LC_table_from_file import read_LC_table_from_file

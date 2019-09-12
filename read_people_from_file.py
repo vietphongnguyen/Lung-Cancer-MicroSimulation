@@ -1,3 +1,17 @@
+# python3
+
+"""
+In this class, I did ... Input variables are:
+
+
+example python code use:
+
+
+Author: Phong Nguyen (vietphong.nguyen@gmail.com)
+Last modified: SEP 2019
+"""
+
+
 import xlrd
 from Person import Person
 

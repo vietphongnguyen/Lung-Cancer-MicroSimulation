@@ -1,3 +1,21 @@
+# python3
+
+"""
+In this class, I create a Drop-down Option Menu at position (X,Y). Input variables are:
+    mainframe,  --> This is the parent frame to lay this menu
+    x_pos,      --> the absolute position of X
+    y_pos,      --> the absolute position of Y
+    choices,    --> the list of choices in the menu
+    default=0   --> the default choice position. (Optional) If not provide, it will show the first position (0)
+
+example python code use:
+    gender_choices = ['Male  ', 'Female']
+    gender_menu = DropdownOptionMenu(frame1, 135, 2, gender_choices)
+
+Author: Phong Nguyen (vietphong.nguyen@gmail.com)
+Last modified: SEP 2019
+"""
+
 import tkinter as tk
 
 

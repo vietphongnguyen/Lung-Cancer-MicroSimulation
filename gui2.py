@@ -1,7 +1,18 @@
+# python3
+
+"""
+In this file, I wrote the main startup GUI for the Lung Cancer Micro-Simulation program
+
+Author: Phong Nguyen (vietphong.nguyen@gmail.com)
+Last modified: SEP 2019
+"""
+
+
 from tkinter import messagebox
 from tkinter.ttk import Progressbar, Style
 
 from DropdownOptionMenu import DropdownOptionMenu
+from GenerateExcelTable import GenerateExcelTable
 from SimulateLCModelNoScreening import SimulateLCModelNoScreening
 from get_years_remain_screening import get_years_remain_screening
 from Person import Person, get_model_coef_from_file, get_basehaz_from_file
@@ -180,7 +191,7 @@ def run_model_for_list_of_people(filename):
 
 
 def generate_excel_table():
-    pass
+    GenerateExcelTable()
 
 
 root = tk.Tk()
@@ -388,7 +399,7 @@ file_name_entry.pack()
 # Button to generate excel table for every combination
 tk.Label(frame2, bg="#5fb7fa").pack()
 tk.Label(frame2, bg="#5fb7fa").pack()
-tk.Label(frame2, bg="#5fb7fa", fg="white", text="________________________________________").pack()
+tk.Label(frame2, bg="#5fb7fa", fg="white", text="____________________________________________________________").pack()
 tk.Label(frame2, bg="#5fb7fa").pack()
 tk.Label(frame2, bg="#5fb7fa").pack()
 tk.Button(frame2, text="Generate Excel Table For Every Combination", command=generate_excel_table).pack()

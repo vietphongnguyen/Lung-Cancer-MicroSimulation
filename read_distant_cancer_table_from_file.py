@@ -1,3 +1,17 @@
+# python3
+
+"""
+In this class, I did ... Input variables are:
+
+
+example python code use:
+
+
+Author: Phong Nguyen (vietphong.nguyen@gmail.com)
+Last modified: SEP 2019
+"""
+
+
 import xlrd
 
 from read_LC_table_from_file import to_interval, to_sex, to_age, to_race, to_survival
