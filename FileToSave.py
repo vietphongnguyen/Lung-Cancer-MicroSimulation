@@ -25,9 +25,12 @@ class FileToSave:
         r = label.grid_info()['row']  # Row of the button
         c = label.grid_info()['column']
 
-        file_name = tk.Entry(parent_frame, width=50)
-        file_name.insert(tk.END, default_file_name)
-        file_name.grid(row=r, column=c + 1)
+        self.input_name = tk.Entry(parent_frame, width=50)
+        self.input_name.insert(tk.END, default_file_name)
+        self.input_name.grid(row=r, column=c + 1)
         tk.Button(parent_frame, text="Browse ...").grid(row=r, column=c + 2)
 
-        self.file_name = file_name.get()
+        self.update_file_name()
+
+    def update_file_name(self):
+        self.file_name = self.input_name.get()

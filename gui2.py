@@ -7,10 +7,10 @@ Author: Phong Nguyen (vietphong.nguyen@gmail.com)
 Last modified: SEP 2019
 """
 
-
 from tkinter import messagebox
 from tkinter.ttk import Progressbar, Style
 
+import ConstantTables
 from DropdownOptionMenu import DropdownOptionMenu
 from GenerateExcelTable import GenerateExcelTable
 from SimulateLCModelNoScreening import SimulateLCModelNoScreening
@@ -23,31 +23,15 @@ from get_years_remain_NO_screening import get_years_remain
 from read_people_from_file import read_people_from_file
 from read_regional_cancer_table_from_file import read_regional_cancer_table_from_file
 
+if __name__ != "__main__":
+    exit()
+
 try:
     # Python2
     import Tkinter as tk
 except ImportError:
     # Python3
     import tkinter as tk
-
-
-def initiate_table_and_array_from_file():
-    global life_table, local_cancer, regional_cancer, distant_cancer, \
-        basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F
-
-    # init reading data table
-    life_table = read_life_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-    local_cancer = read_LC_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-    regional_cancer = read_regional_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-    distant_cancer = read_distant_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-
-    # initiate the basehaz and the model_coef array to calculate the LCRAT_1mon_risk
-    basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
-    basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
-    basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
-    model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
-    model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
-
 
 old_age_choice = None
 old_gender_choices = None
@@ -151,10 +135,9 @@ def run_model_for_1_person():
                 , edu6_choices.index(edu6_menu.tk_var.get())
                 )
 
-    p1.initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
+    p1.initiate_LCRAT_1mon_risk()
 
-    years_remain = get_years_remain(p1, life_table, local_cancer, regional_cancer, distant_cancer, progress, root,
-                                    False)
+    years_remain = get_years_remain(p1, progress, root, False)
 
     # years_remain_screening = get_years_remain_screening(p1, life_table, local_cancer, regional_cancer, distant_cancer,
     #                                                     progress, root, False)
@@ -179,8 +162,7 @@ def run_model_for_list_of_people(filename):
     total_years_remain = 0
     for i in range(len(people_list)):
         # people_list[i].initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
-        years_remain = get_years_remain(people_list[i], life_table, local_cancer, regional_cancer, distant_cancer,
-                                        progress, root, False)
+        years_remain = get_years_remain(people_list[i], progress, root, False)
         output_text.insert(tk.END, "Person [" + str(people_list[i].ID) + "] Years remain: " + str(years_remain) + " \n")
         total_years_remain += years_remain
 
@@ -191,7 +173,7 @@ def run_model_for_list_of_people(filename):
 
 
 def generate_excel_table():
-    GenerateExcelTable()
+    table = GenerateExcelTable()
 
 
 root = tk.Tk()
@@ -343,7 +325,8 @@ qt_years_menu = DropdownOptionMenu(frame1, 410, 2, qt_years_choices)
 
 # creating cigarettes per day label
 cpd_label = tk.Label(frame1, text="Cigarettes/day", bg="#5fb7fa").place(x=475, y=5)
-cpd_choices = ['0 ', '1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ', '8 ', '9 ', '10', '11', '12', '13', '14', '15']
+cpd_choices = ['0 ', '1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ', '8 ', '9 ', '10', '11', '12', '13', '14', '15',
+               '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']
 cpd_menu = DropdownOptionMenu(frame1, 560, 2, cpd_choices, 5)
 
 # creating race label ((0=Non-hispanic white, 1=Non-hispanic Black/African American, 2=Hispanic,
@@ -379,8 +362,8 @@ edu6_choices = ['<12 grade', 'HS graduate', 'post hs/no college', 'associate deg
 edu6_menu = DropdownOptionMenu(frame1, 1420, 2, edu6_choices)
 
 # Creating a GO image button
-photo = tk.PhotoImage(file=r"./images/Go-button_100.png")
-go_button = tk.Button(frame2, text='Go !', image=photo, bg="#5fb7fa", borderwidth=0, command=go)
+go_photo = tk.PhotoImage(file=r"./images/Go-button_100.png")
+go_button = tk.Button(frame2, text='Go !', image=go_photo, bg="#5fb7fa", borderwidth=0, command=go)
 go_button.pack()
 
 # Run model for the person above Checkbox
@@ -415,7 +398,7 @@ output_text.pack(side=tk.LEFT, fill=tk.Y)
 S.config(command=output_text.yview)
 output_text.config(yscrollcommand=S.set)
 
-initiate_table_and_array_from_file()
+ConstantTables.ConstantTables.init_value()
 
 print("Starting GUI ...")
 root.mainloop()

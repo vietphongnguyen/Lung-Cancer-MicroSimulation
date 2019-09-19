@@ -16,6 +16,8 @@ import math
 
 import xlrd
 
+import ConstantTables
+
 
 def get_basehaz_from_file(file_name, column):
     print("Reading Baseline hazard/survival [column " + str(column) + "] from file [" + file_name + "] ...", end="")
@@ -51,7 +53,7 @@ def get_model_coef_from_file(file_name, column):
 class Person:
 
     def __init__(self, age, gender, smkyears, qtyears, cpd, race, emp, fam_lung_trend, bmi, edu6,
-                 pkyr_cat=50.4, LCRAT_1mon_risk=0.000983915, ID=0):
+                 ID=0, pkyr_cat=50.4, LCRAT_1mon_risk=0.000983915):
         self.ID = ID
         self.age = age  # current age (numeric)
         self.gender = gender  # gender value (1=Female, 0=Male)
@@ -77,7 +79,7 @@ class Person:
         if LCRAT_1mon_risk != 0.000983915:
             pass
 
-    def initiate_LCRAT_1mon_risk(self, basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F):
+    def initiate_LCRAT_1mon_risk(self):
 
         # LCRAT_RR = EXP(   calculator!C2*model_coef!$D$4
         #                   +(IF(calculator!G2=1,1,0))*model_coef!$D$5
@@ -98,61 +100,61 @@ class Person:
         #                )
 
         # calculator!C2 * model_coef!$D$4
-        x = self.gender * model_coef_D[4]
+        x = self.gender * ConstantTables.model_coef_D[4]
 
         # +(IF(calculator!G2=1,1,0))*model_coef!$D$5
         if self.race == 1:
-            x += model_coef_D[5]
+            x += ConstantTables.model_coef_D[5]
 
         # +(IF(calculator!G2=2,1,0))*model_coef!$D$6
         if self.race == 2:
-            x += model_coef_D[6]
+            x += ConstantTables.model_coef_D[6]
 
         # +(IF(calculator!G2=3,1,0))*model_coef!$D$7
         if self.race == 3:
-            x += model_coef_D[7]
+            x += ConstantTables.model_coef_D[7]
 
         # +calculator!K2*model_coef!$D$8
-        x += self.edu6 * model_coef_D[8]
+        x += self.edu6 * ConstantTables.model_coef_D[8]
 
         #  +calculator!I2*model_coef!$D$9
-        x += self.fam_lung_trend * model_coef_D[9]
+        x += self.fam_lung_trend * ConstantTables.model_coef_D[9]
 
         # +calculator!H2*model_coef!$D$10
-        x += self.emp * model_coef_D[10]
+        x += self.emp * ConstantTables.model_coef_D[10]
 
         # +(IF(calculator!J2<=18.5,1,0))*model_coef!$D$11
         if self.bmi <= 18.5:
-            x += model_coef_D[11]
+            x += ConstantTables.model_coef_D[11]
 
         # +(IF(calculator!F2>20,1,0))*model_coef!$D$12
         if self.cpd > 20:
-            x += model_coef_D[12]
+            x += ConstantTables.model_coef_D[12]
 
         # +(IF(calculator!M2>=30 & calculator!M2<40,1,0))*model_coef!$D$13
         self.pkyr_cat = self.smkyears * self.cpd / 20  # pkyr_cat = D2 * F2 / 20
         if 30 <= self.pkyr_cat < 40:
-            x += model_coef_D[13]
+            x += ConstantTables.model_coef_D[13]
 
         # +(IF(calculator!M2>=40 & calculator!M2<50,1,0))*model_coef!$D$14
         if 40 <= self.pkyr_cat < 50:
-            x += model_coef_D[14]
+            x += ConstantTables.model_coef_D[14]
 
         # +(IF(calculator!M2>=50,1,0))*model_coef!$D$15
         if self.pkyr_cat >= 50:
-            x += model_coef_D[15]
+            x += ConstantTables.model_coef_D[15]
 
         #  +LN(calculator!B2)*model_coef!$D$16
-        x += math.log(self.age) * model_coef_D[16]
+        x += math.log(self.age) * ConstantTables.model_coef_D[16]
 
         #  +LN(calculator!J2)*model_coef!$D$17
-        x += math.log(self.bmi) * model_coef_D[17]
+        x += math.log(self.bmi) * ConstantTables.model_coef_D[17]
 
         # +LN(IF(calculator!E2="NA",0,calculator!E2)+1)*model_coef!$D$18
-        x += math.log(self.qtyears + 1) * model_coef_D[18]
+        x += math.log(self.qtyears + 1) * ConstantTables.model_coef_D[18]
 
         # +calculator!D2*model_coef!$D$19
-        x += self.smkyears * model_coef_D[19]
+        x += self.smkyears * ConstantTables.model_coef_D[19]
 
         self.LCRAT_RR = math.exp(x)
 
@@ -174,57 +176,57 @@ class Person:
         #                   )
 
         # calculator!C2*model_coef!$F$4
-        y = self.gender * model_coef_F[4]
+        y = self.gender * ConstantTables.model_coef_F[4]
 
         # + (IF(calculator!G2=1,1,0))*model_coef!$F$5
         if self.race == 1:
-            y += model_coef_F[5]
+            y += ConstantTables.model_coef_F[5]
 
         # + (IF(calculator!G2=2,1,0))*model_coef!$F$6
         if self.race == 2:
-            y += model_coef_F[6]
+            y += ConstantTables.model_coef_F[6]
 
         # + (IF(calculator!G2=3,1,0))*model_coef!$F$7
         if self.race == 3:
-            y += model_coef_F[7]
+            y += ConstantTables.model_coef_F[7]
 
         # + calculator!K2*model_coef!$F$8
-        y += self.edu6 * model_coef_F[8]
+        y += self.edu6 * ConstantTables.model_coef_F[8]
 
         #  + calculator!H2*model_coef!$F$9
-        y += self.emp * model_coef_F[9]
+        y += self.emp * ConstantTables.model_coef_F[9]
 
         # + (IF(calculator!J2<=18.5,1,0))*model_coef!$F$10
         if self.bmi <= 18.5:
-            y += model_coef_F[10]
+            y += ConstantTables.model_coef_F[10]
 
         # + (IF(calculator!F2>20,1,0))*model_coef!$F$11
         if self.cpd > 20:
-            y += model_coef_F[11]
+            y += ConstantTables.model_coef_F[11]
 
         # + (IF(calculator!M2>=30 & calculator!M2<40,1,0))*model_coef!$F$12
         if 30 <= self.pkyr_cat < 40:
-            y += model_coef_F[12]
+            y += ConstantTables.model_coef_F[12]
 
         # + (IF(calculator!M2>=40 & calculator!M2<50,1,0))*model_coef!$F$13
         if 40 <= self.pkyr_cat < 50:
-            y += model_coef_F[13]
+            y += ConstantTables.model_coef_F[13]
 
         #  + (IF(calculator!M2>=50,1,0))*model_coef!$F$14
         if self.pkyr_cat >= 50:
-            y += model_coef_F[14]
+            y += ConstantTables.model_coef_F[14]
 
         #  + (calculator!B2)^2 * model_coef!$F$15
-        y += self.age ** 2 * model_coef_F[15]
+        y += self.age ** 2 * ConstantTables.model_coef_F[15]
 
         # + (calculator!J2 - 25)^2 * model_coef!$F$16
-        y += (self.bmi - 25) ** 2 * model_coef_F[16]
+        y += (self.bmi - 25) ** 2 * ConstantTables.model_coef_F[16]
 
         # + LN(IF(calculator!E2="NA",0,calculator!E2)+1) * model_coef!$F$17
-        y += math.log(self.qtyears + 1) * model_coef_F[17]
+        y += math.log(self.qtyears + 1) *ConstantTables.model_coef_F[17]
 
         # + calculator!D2 * model_coef!$F$18
-        y += self.smkyears * model_coef_F[18]
+        y += self.smkyears * ConstantTables.model_coef_F[18]
 
         self.cox_death_RR = math.exp(y)
 
@@ -236,8 +238,9 @@ class Person:
         #                               (basehaz!$J$5:$J$1261)^calculator!P2)
         #                       * calculator!O2
         sum_product = float(0.0)
-        for i in range(0, len(basehaz_G)):
-            sum_product += basehaz_H[i] ** self.LCRAT_RR * basehaz_G[i] * (basehaz_J[i] ** self.cox_death_RR)
+        for i in range(0, len(ConstantTables.basehaz_G)):
+            sum_product += ConstantTables.basehaz_H[i] ** self.LCRAT_RR * ConstantTables.basehaz_G[i] \
+                           * (ConstantTables.basehaz_J[i] ** self.cox_death_RR)
         self.LCRAT_13yr_risk = sum_product * self.LCRAT_RR
         # print(self.LCRAT_13yr_risk)
 
@@ -280,4 +283,6 @@ def test_initiate_LCRAT_1mon_risk():
 
     print(p1.LCRAT_1mon_risk)
 
-# test_initiate_LCRAT_1mon_risk()
+
+if __name__ == "__main__":
+    test_initiate_LCRAT_1mon_risk()

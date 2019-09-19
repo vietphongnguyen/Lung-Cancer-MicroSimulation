@@ -10,8 +10,7 @@ example python code use:
 Author: Phong Nguyen (vietphong.nguyen@gmail.com)
 Last modified: SEP 2019
 """
-
-
+import ConstantTables
 from Person import Person, get_model_coef_from_file, get_basehaz_from_file
 from SimulateLCModelNoScreening import str_sum
 from read_LC_table_from_file import read_LC_table_from_file
@@ -21,8 +20,7 @@ from read_people_from_file import read_people_from_file
 from read_regional_cancer_table_from_file import read_regional_cancer_table_from_file
 
 
-def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_table, progress=None, root=None,
-                     display_progress=True):
+def get_years_remain(p, progress=None, root=None, display_progress=True):
     """ Returns the total years remain - NO screening """
     print("Person [" + str(p.ID) + "] : Getting Years Remain (No Screening). Please wait ...", end="")
     remain = 0
@@ -66,7 +64,7 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
         # Constant a. Age-, sex-, and race/ethnicity-specific prob. of dying from life table.
         # See Sheet "Life-table", column K to R. This is per month prob
         # print("int(running_age) - 50 = " + str(int(running_age) - 50) + " | a_column = " + str(a_column))
-        a = life_table[int(running_age) - 50][a_column]
+        a = ConstantTables.life_table[int(running_age) - 50][a_column]
 
         # disease_free
         disease_free_death_other_causes = a * disease_free
@@ -103,7 +101,7 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
                 age = int(running_age / 10 - 4)
                 if age > 4: age = 4
                 # print(interval, p.gender, p.race, age)
-                e = 1 - LC_table[interval][p.gender][p.race][age] * (1 - a)
+                e = 1 - ConstantTables.local_cancer[interval][p.gender][p.race][age] * (1 - a)
                 local_LC_survive_distant_LC = local_LC_survive * e
                 distant_LC.append([local_LC_survive_distant_LC, 0])  # initial with interval = 0 month
                 local_LC_survive -= local_LC_survive_distant_LC
@@ -125,7 +123,7 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
                 age = int(running_age / 10 - 4)
                 if age > 4: age = 4
                 # print(interval, p.gender, p.race, age)
-                f = 1 - regional_LC_table[interval][p.gender][p.race][age] * (1 - a)
+                f = 1 - ConstantTables.regional_cancer[interval][p.gender][p.race][age] * (1 - a)
                 regional_LC_survive_distant_LC = regional_LC_survive * f
                 distant_LC.append([regional_LC_survive_distant_LC, 0])  # initial with interval = 0 month
                 regional_LC_survive -= regional_LC_survive_distant_LC
@@ -147,7 +145,7 @@ def get_years_remain(p, life_table, LC_table, regional_LC_table, distant_LC_tabl
                 age = int(running_age / 10 - 4)
                 if age > 4: age = 4
                 # print(interval, p.gender, p.race, age)
-                g = 1 - distant_LC_table[interval][p.gender][p.race][age] * (1 - a)
+                g = 1 - ConstantTables.distant_cancer[interval][p.gender][p.race][age] * (1 - a)
                 distant_LC_survive_die = distant_LC_survive * g
 
                 distant_LC_survive -= distant_LC_survive_die
@@ -232,4 +230,9 @@ def test_read_people_from_file():
     print("\n ------------------------ \nTotal life years remain: " + str(total_years_remain) + " \n")
     print("Average life years per person: " + str(total_years_remain / len(people_list)) + " \n ----------------- \n")
 
-# test_read_people_from_file()
+
+if __name__ == "__main__":
+    test_read_people_from_file()
+
+
+

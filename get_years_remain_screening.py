@@ -537,4 +537,6 @@ def test2():
     print("\n ------------------------ \nTotal life years remain: " + str(total_years_remain) + " \n")
     print("Average life years per person: " + str(total_years_remain / len(people_list)) + " \n ----------------- \n")
 
-# test()
+
+if __name__ == "__main__":
+     test()
