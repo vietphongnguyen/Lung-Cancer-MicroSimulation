@@ -8,17 +8,14 @@ Last modified: SEP 2019
 
 import unittest
 
+import ConstantTables
 from Person import Person, get_model_coef_from_file, get_basehaz_from_file
 
 
 class TestPerson(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        TestPerson.basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
-        TestPerson.basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
-        TestPerson.basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
-        TestPerson.model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
-        TestPerson.model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
+        ConstantTables.ConstantTables()
 
     @classmethod
     def tearDownClass(cls):
@@ -60,7 +57,7 @@ class TestPerson(unittest.TestCase):
         )
         expect_result = 0.000983915
         delta = 0.000000001
-        p1.initiate_LCRAT_1mon_risk(TestPerson.basehaz_G, TestPerson.basehaz_H, TestPerson.basehaz_J, TestPerson.model_coef_D, TestPerson.model_coef_F)
+        p1.initiate_LCRAT_1mon_risk()
         # print(p1.LCRAT_1mon_risk)
         self.assertLessEqual(abs(p1.LCRAT_1mon_risk - expect_result), delta)
 
@@ -78,7 +75,7 @@ class TestPerson(unittest.TestCase):
         )
         expected_result_2 = 0.00113835
         delta = 0.00000001
-        p2.initiate_LCRAT_1mon_risk(TestPerson.basehaz_G, TestPerson.basehaz_H, TestPerson.basehaz_J, TestPerson.model_coef_D, TestPerson.model_coef_F)
+        p2.initiate_LCRAT_1mon_risk()
         # print(p2.LCRAT_1mon_risk)
         self.assertLessEqual(abs(p2.LCRAT_1mon_risk - expected_result_2), delta)
 

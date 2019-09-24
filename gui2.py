@@ -13,15 +13,9 @@ from tkinter.ttk import Progressbar, Style
 import ConstantTables
 from DropdownOptionMenu import DropdownOptionMenu
 from GenerateExcelTable import GenerateExcelTable
+from Person import Person
 from SimulateLCModelNoScreening import SimulateLCModelNoScreening
-from get_years_remain_screening import get_years_remain_screening
-from Person import Person, get_model_coef_from_file, get_basehaz_from_file
-from read_LC_table_from_file import read_LC_table_from_file
-from read_distant_cancer_table_from_file import read_distant_cancer_table_from_file
-from read_life_table_from_file import read_life_table_from_file
-from get_years_remain_NO_screening import get_years_remain
 from read_people_from_file import read_people_from_file
-from read_regional_cancer_table_from_file import read_regional_cancer_table_from_file
 
 if __name__ != "__main__":
     exit()
@@ -137,7 +131,7 @@ def run_model_for_1_person():
 
     p1.initiate_LCRAT_1mon_risk()
 
-    years_remain = get_years_remain(p1, progress, root, False)
+    years_remain = p1.get_years_remain_no_screening(progress, root, False)
 
     # years_remain_screening = get_years_remain_screening(p1, life_table, local_cancer, regional_cancer, distant_cancer,
     #                                                     progress, root, False)
@@ -162,7 +156,7 @@ def run_model_for_list_of_people(filename):
     total_years_remain = 0
     for i in range(len(people_list)):
         # people_list[i].initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
-        years_remain = get_years_remain(people_list[i], progress, root, False)
+        years_remain = people_list[i].get_years_remain_no_screening(progress, root, False)
         output_text.insert(tk.END, "Person [" + str(people_list[i].ID) + "] Years remain: " + str(years_remain) + " \n")
         total_years_remain += years_remain
 

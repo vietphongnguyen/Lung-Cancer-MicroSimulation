@@ -11,16 +11,9 @@ Author: Phong Nguyen (vietphong.nguyen@gmail.com)
 Last modified: SEP 2019
 """
 
-
 import tkinter as tk
 
-
-def str_sum(local_LC):
-    s = 0.0
-    for i in local_LC:
-        s += i[0]
-    # s /= 12  # device by 12 to convert from months to years
-    return str("{:.20f}".format(s))
+from get_years_remain_NO_screening import str_sum
 
 
 class SimulateLCModelNoScreening:

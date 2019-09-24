@@ -1,26 +1,22 @@
 # python3
 
 """
-In this class, I did ... Input variables are:
-
-
-example python code use:
-
 
 Author: Phong Nguyen (vietphong.nguyen@gmail.com)
 Last modified: SEP 2019
 """
 import ConstantTables
-from Person import Person, get_model_coef_from_file, get_basehaz_from_file
-from SimulateLCModelNoScreening import str_sum
-from read_LC_table_from_file import read_LC_table_from_file
-from read_distant_cancer_table_from_file import read_distant_cancer_table_from_file
-from read_life_table_from_file import read_life_table_from_file
-from read_people_from_file import read_people_from_file
-from read_regional_cancer_table_from_file import read_regional_cancer_table_from_file
 
 
-def get_years_remain(p, progress=None, root=None, display_progress=True):
+def str_sum(local_LC):
+    s = 0.0
+    for i in local_LC:
+        s += i[0]
+    # s /= 12  # device by 12 to convert from months to years
+    return str("{:.20f}".format(s))
+
+
+def get_years_remain_no_screening(p, progress=None, root=None, display_progress=True):  # root is for updating idle task
     """ Returns the total years remain - NO screening """
     print("Person [" + str(p.ID) + "] : Getting Years Remain (No Screening). Please wait ...", end="")
     remain = 0
@@ -49,11 +45,12 @@ def get_years_remain(p, progress=None, root=None, display_progress=True):
         pass
     while running_age < 100:
         # update the progress bar in gui2
-        try:
-            progress['value'] = (running_age - 50) ** 2 / 25
-            root.update_idletasks()
-        except TypeError:
-            pass
+        if progress is not None:
+            try:
+                progress['value'] = (running_age - 50) ** 2 / 25
+                root.update_idletasks()
+            except TypeError:
+                pass
 
         if display_progress:
             if (current_month / total_month) > (unit / display_dot):
@@ -155,84 +152,17 @@ def get_years_remain(p, progress=None, root=None, display_progress=True):
         running_age += 1 / 12  # increase age by a month
 
     print("done")
-    try:
-        progress['style'] = "green.Horizontal.TProgressbar"
-        progress['value'] = progress["maximum"]
-    except TypeError:
-        pass
+    if progress is not None:
+        try:
+            progress['style'] = "green.Horizontal.TProgressbar"
+            progress['value'] = progress["maximum"]
+        except TypeError:
+            pass
 
     return [remain / 12  # remain increased every loop (every month). Have to return in years by dividing by 12
-        , disease_free, local_LC, regional_LC, distant_LC, death_other_causes
+            , disease_free, local_LC, regional_LC, distant_LC, death_other_causes
             ]
 
 
-def test_1_person():
-    # init reading data table
-    life_table1 = read_life_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-    local_cancer2 = read_LC_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-    regional_cancer3 = read_regional_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-    distant_cancer4 = read_distant_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-
-    # initiate the basehaz and the model_coef array to calculate the LCRAT_1mon_risk
-    basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
-    basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
-    basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
-    model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
-    model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
-
-    # Person(age, gender, smkyears, qtyears, cpd, race, emp, fam_lung_trend, bmi, edu6)
-    p1 = Person(72, 1, 42, 6, 24, 2, 0, 2, 27, 5, 50.4, 0.000983915, 4)
-    p2 = Person(80, 0, 0, 0, 0, 0, 0, 0, 24.62, 0)
-    p3 = Person(99, 0, 1, 0, 5, 0, 0, 0, 24.62, 0)
-
-    p3.initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
-
-    years_remain = get_years_remain(p3, life_table1, local_cancer2, regional_cancer3, distant_cancer4, None, None, True)
-
-    print("Remain : {}".format(years_remain[0]))
-    print("Disease_free : {}".format(years_remain[1]))
-    print("local_LC : {}".format(years_remain[2]))
-    print("         Sum : {}".format(str_sum(years_remain[2])))
-
-    print("regional_LC : {}".format(years_remain[3]))
-    print("distant_LC : {}".format(years_remain[4]))
-    print("death_other_causes : {}".format(years_remain[5]))
-
-
-# test_1_person()
-
-
-def test_read_people_from_file():
-    # init reading data table
-    life_table = read_life_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-    local_cancer = read_LC_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-    regional_cancer = read_regional_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-    distant_cancer = read_distant_cancer_table_from_file("input/Copy of Lung cancer_7-19-2019.xlsx")
-
-    # initiate the basehaz and the model_coef array to calculate the LCRAT_1mon_risk
-    basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
-    basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
-    basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
-    model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
-    model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
-
-    people_list = read_people_from_file("input/lcrisk_tool.xlsx")
-    # print(people_list[0].age)
-
-    total_years_remain = 0
-    for i in range(len(people_list)):
-        # people_list[i].initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
-        years_remain = get_years_remain(people_list[i], life_table, local_cancer, regional_cancer, distant_cancer,
-                                        None, None, True)
-        print("Years remain: " + str(years_remain) + " \n")
-        total_years_remain += years_remain
-
-    print("\n ------------------------ \nTotal life years remain: " + str(total_years_remain) + " \n")
-    print("Average life years per person: " + str(total_years_remain / len(people_list)) + " \n ----------------- \n")
-
-
 if __name__ == "__main__":
-    test_read_people_from_file()
-
-
-
+    pass

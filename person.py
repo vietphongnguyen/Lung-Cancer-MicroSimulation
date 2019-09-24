@@ -1,22 +1,17 @@
 # python3
 
 """
-In this class, I did ... Input variables are:
-
-
-example python code use:
-
 
 Author: Phong Nguyen (vietphong.nguyen@gmail.com)
 Last modified: SEP 2019
 """
-
 
 import math
 
 import xlrd
 
 import ConstantTables
+from get_years_remain_NO_screening import get_years_remain_no_screening
 
 
 def get_basehaz_from_file(file_name, column):
@@ -59,9 +54,9 @@ class Person:
         '98', '99'
     ]
     gender_choices = ['Male', 'Female']
-    smk_years_choices = ['0 ', '1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ', '8 ', '9 ', '10', '11', '12', '13', '14', '15']
+    smk_years_choices = ['1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ', '8 ', '9 ', '10', '11', '12', '13', '14', '15']
     qt_years_choices = ['0', '1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ', '8 ', '9 ', '10', '11', '12', '13', '14', '15']
-    cpd_choices = ['0 ', '1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ', '8 ', '9 ', '10', '11', '12', '13', '14', '15',
+    cpd_choices = ['1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ', '8 ', '9 ', '10', '11', '12', '13', '14', '15',
                    '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'
                    ]  # > 20 or else
     race_choices = ['Non-hispanic white', 'Non-hispanic Black/African American', 'Hispanic',
@@ -89,8 +84,7 @@ class Person:
     edu6_choices = ['<12 grade', 'HS graduate', 'post hs/no college', 'associate degree/some college',
                     'bachelors degree', 'graduate school']
 
-    def __init__(self, age, gender, smkyears, qtyears, cpd, race, emp, fam_lung_trend, bmi, edu6,
-                 ID=0, pkyr_cat=50.4, LCRAT_1mon_risk=0.000983915):
+    def __init__(self, age, gender, smkyears, qtyears, cpd, race, emp, fam_lung_trend, bmi, edu6, ID=0):
         self.ID = ID
         self.age = age  # current age (numeric)
         self.gender = gender  # gender value (1=Female, 0=Male)
@@ -106,15 +100,9 @@ class Person:
         self.emp = emp  # lung disease (1=COPD or Emphysema, 0=No COPD or Emphysema)
         self.fam_lung_trend = fam_lung_trend  # number of parents with lung cancer (0,1,2)
         self.bmi = bmi  # bmi value (numeric)
-        self.edu6 = edu6  # highest education level (1=<12 grade, 2=HS graduate,
-        # 3=post hs/no college, 4=associate degree/some college,
-        # 5=bachelors degree, 6=graduate school)
-        self.pkyr_cat = pkyr_cat
-        self.LCRAT_1mon_risk = LCRAT_1mon_risk  # (Constant b) 1 month risk. Incidence of lung cancer by age, sex, race.
-        # Lung cancer risk model-LCRAT
-
-        if LCRAT_1mon_risk != 0.000983915:
-            pass
+        self.edu6 = edu6    # highest education level ( 1=<12 grade, 2=HS graduate, 3=post hs/no college,
+        #                                               4=associate degree/some college, 5=bachelors degree,
+        #                                               6=graduate school)
 
     def initiate_LCRAT_1mon_risk(self):
 
@@ -260,16 +248,14 @@ class Person:
         y += (self.bmi - 25) ** 2 * ConstantTables.model_coef_F[16]
 
         # + LN(IF(calculator!E2="NA",0,calculator!E2)+1) * model_coef!$F$17
-        y += math.log(self.qtyears + 1) *ConstantTables.model_coef_F[17]
+        y += math.log(self.qtyears + 1) * ConstantTables.model_coef_F[17]
 
         # + calculator!D2 * model_coef!$F$18
         y += self.smkyears * ConstantTables.model_coef_F[18]
 
         self.cox_death_RR = math.exp(y)
 
-        # print("LCRAT_RR = " + str(self.LCRAT_RR) + "  |  cox_death_RR = " + str(self.cox_death_RR))
-
-        # LCRAT_13yr_risk =     SUMPRODUCT(--(basehaz!$F$5:$F$1261<=13),        # always = 1  --> IGNORE
+        # LCRAT_13yr_risk =     SUMPRODUCT(--(basehaz!$F$5:$F$1261<=13),
         #                               (basehaz!$H$5:$H$1261)^calculator!O2,
         #                               basehaz!$G$5:$G$1261,
         #                               (basehaz!$J$5:$J$1261)^calculator!P2)
@@ -288,48 +274,14 @@ class Person:
         # Print out to the console screen:  Person [1] age: 51 (Male)   smk_years: 8  qt_years: 4  cpd: 1  ...
         print("Person [{}] age: {} ({}) smk_years: {} qt_years: {} cpd: {}  ({}, {}) fam_lung_trend: {} bmi: "
               "{}  ({}) "
-              .format(self.ID, Person.age_choices[self.age], Person.gender_choices[self.gender],
-                      Person.smk_years_choices[self.smkyears], Person.qt_years_choices[self.qtyears],
-                      Person.cpd_choices[self.cpd], Person.race_choices[self.race], Person.emp_choices[self.emp],
-                      Person.fam_lung_trend_choices[self.fam_lung_trend], Person.bmi_choices[self.bmi],
+              .format(self.ID, self.age, Person.gender_choices[self.gender], self.smkyears, self.qtyears,
+                      self.cpd, Person.race_choices[self.race], Person.emp_choices[self.emp],
+                      Person.fam_lung_trend_choices[self.fam_lung_trend], self.bmi,
                       Person.edu6_choices[self.edu6 - 1]))
 
-
-def test_initiate_LCRAT_1mon_risk():
-    p2 = Person(
-        72,  # age
-        1,  # gender
-        42,  # smkyears
-        6,  # qtyears
-        24,  # cpd
-        2,  # race
-        0,  # emp
-        2,  # fam_lung_trend
-        27,  # bmi
-        5,  # edu6
-    )
-    p1 = Person(
-        66,  # age
-        0,  # gender
-        43,  # smkyears
-        0,  # qtyears
-        36,  # cpd
-        0,  # race
-        0,  # emp
-        0,  # fam_lung_trend
-        23,  # bmi
-        3,  # edu6
-    )
-    basehaz_G = get_basehaz_from_file("input/lcrisk_tool.xlsx", 6)
-    basehaz_H = get_basehaz_from_file("input/lcrisk_tool.xlsx", 7)
-    basehaz_J = get_basehaz_from_file("input/lcrisk_tool.xlsx", 9)
-    model_coef_D = get_model_coef_from_file("input/lcrisk_tool.xlsx", 3)
-    model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
-
-    p1.initiate_LCRAT_1mon_risk(basehaz_G, basehaz_H, basehaz_J, model_coef_D, model_coef_F)
-
-    print(p1.LCRAT_1mon_risk)
+    def get_years_remain_no_screening(self, progress=None, root_=None, display_progress=True):
+        return get_years_remain_no_screening(self, progress, root_, display_progress)
 
 
 if __name__ == "__main__":
-    test_initiate_LCRAT_1mon_risk()
+    pass
