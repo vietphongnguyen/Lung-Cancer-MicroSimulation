@@ -357,7 +357,7 @@ class GenerateExcelTable:
         try:
             max_id = int(self.number_of_people_menu.tk_var.get())  # maximum number of people to create
         except ValueError:
-            max_id = 1000000000
+            max_id = 1_000_000_000
         max_row = max_id + 1
 
         # Add a table to the worksheet.
@@ -387,7 +387,7 @@ class GenerateExcelTable:
             if person_id >= max_id:  # limit the total number of people
                 break
 
-            self.label_overall['text'] = 'Overall : {}/{}'.format(person_id + 1, max_id)
+            self.label_overall['text'] = 'Overall : {:,}/{:,}'.format(person_id + 1, max_id)
 
             age_draw = Person.age_choices.index(
                 random.choice(Person.age_choices, 1, p=GenerateExcelTable.age_distribution))

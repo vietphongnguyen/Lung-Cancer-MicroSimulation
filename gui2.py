@@ -10,7 +10,11 @@ Last modified: SEP 2019
 from tkinter import messagebox
 from tkinter.ttk import Progressbar, Style
 
-import ConstantTables
+from PyQt5.uic.properties import QtGui
+from PyQt5 import QtGui
+from PyQt5.QtCore import QThread
+
+from ConstantTables import ConstantTables
 from DropdownOptionMenu import DropdownOptionMenu
 from GenerateExcelTable import GenerateExcelTable
 from Person import Person
@@ -392,7 +396,9 @@ output_text.pack(side=tk.LEFT, fill=tk.Y)
 S.config(command=output_text.yview)
 output_text.config(yscrollcommand=S.set)
 
-ConstantTables.ConstantTables.init_value()
+# create a new thread [init_value] running in the background
+init_value_thread = ConstantTables()
+init_value_thread.start()
 
 print("Starting GUI ...")
 root.mainloop()

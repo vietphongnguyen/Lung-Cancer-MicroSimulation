@@ -10,6 +10,8 @@ Sample of how to use:
 Author: Phong Nguyen (vietphong.nguyen@gmail.com)
 Last modified: SEP 2019
 """
+from PyQt5.QtCore import QThread
+
 from Person import get_model_coef_from_file, get_basehaz_from_file
 from read_LC_table_from_file import read_LC_table_from_file
 from read_distant_cancer_table_from_file import read_distant_cancer_table_from_file
@@ -17,7 +19,7 @@ from read_life_table_from_file import read_life_table_from_file
 from read_regional_cancer_table_from_file import read_regional_cancer_table_from_file
 
 
-class ConstantTables:
+class ConstantTables(QThread):
     life_table = None
     local_cancer = None
     regional_cancer = None
@@ -47,5 +49,11 @@ class ConstantTables:
         model_coef_F = get_model_coef_from_file("input/lcrisk_tool.xlsx", 5)
 
     def __init__(self):
+        QThread.__init__(self)
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
         if ConstantTables.life_table is None:
             ConstantTables.init_value()
