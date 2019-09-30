@@ -369,6 +369,10 @@ one_person_var = tk.IntVar()
 one_person_var.set(1)
 check_above = tk.Checkbutton(frame2, text="Run model for the person above", variable=one_person_var,
                              bg="#5fb7fa").pack()
+simulation_var = tk.IntVar()
+check_simulation = tk.Checkbutton(frame2, text="       + With visual simulation", variable=simulation_var,
+                             bg="#5fb7fa", fg = "gray").pack()
+tk.Label(frame2, bg="#5fb7fa").pack()
 
 # Read the list of people Checkbox
 list_people_var = tk.IntVar()

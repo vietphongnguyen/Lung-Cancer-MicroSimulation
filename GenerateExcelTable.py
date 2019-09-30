@@ -30,16 +30,12 @@ class GenerateExcelTable:
     # use age_min to normalize the age array index starting from 0. Ex: age = 50 has index 0 in [not_done] array
     age_min = 50
 
-    # age_distribution = [
-    #     50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28,
-    #     27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3,
-    #     2, 1
-    # ]
-    age_distribution = [  # run more on 90 years old people for testing only (Not for production version)
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 9, 8, 7, 6, 5, 4, 3,
+    age_distribution = [
+        50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28,
+        27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3,
         2, 1
     ]
+
     age_rand_sum = sum(age_distribution)
     for i in range(0, len(age_distribution)):
         age_distribution[i] /= age_rand_sum
@@ -322,8 +318,8 @@ class GenerateExcelTable:
 
         # creating number of people dropdown option menu
         tk.Label(frame_right, text="Number of people: ", bg="green", fg="white").place(x=10, y=120)
-        number_of_people_choices = ['1 ', '3 ', '5 ', '10', '50', '100', '200', '500', '1000', '1500', '2000', '5000',
-                                    '10,000', 'All ']
+        number_of_people_choices = ['1 ', '3 ', '5 ', '10', '50', '100', '200', '500', '1_000', '1_500', '2_000',
+                                    '5_000', '10_000', 'All ']
         self.number_of_people_menu = DropdownOptionMenu(frame_right, 120, 120, number_of_people_choices)
 
         self.root.mainloop()
@@ -359,6 +355,7 @@ class GenerateExcelTable:
         except ValueError:
             max_id = 1_000_000_000
         max_row = max_id + 1
+        # print(max_id)
 
         # Add a table to the worksheet.
         table_area = "A3:L" + str(max_row + 4)
@@ -426,8 +423,14 @@ class GenerateExcelTable:
             years_remain = p.get_years_remain_no_screening(self.progress_current_age, self.root, True)
 
             row = "A" + str(3 + person_id)
-            worksheet.write_row(row, [p.ID, p.age, p.gender, p.smkyears, p.qtyears, p.cpd, p.race, p.emp,
-                                      p.fam_lung_trend, p.bmi, p.edu6, years_remain[0]])
+            worksheet.write_row(row, [p.ID, p.age, Person.gender_choices[p.gender], p.smkyears, p.qtyears, p.cpd,
+                                      Person.race_choices[p.race], Person.emp_choices[p.emp],
+                                      p.fam_lung_trend, p.bmi,
+                                      Person.edu6_choices[p.edu6 - GenerateExcelTable.edu6_min],
+
+                                      # str("{:.20f}".format(x))[:number_of_digit_display]
+                                      str("{:.2f}".format(years_remain[0]))
+                                      ])
 
         # keep asking to save the file again after failing to do it.
         try_again = messagebox.YES
@@ -598,5 +601,5 @@ class GenerateExcelTable:
 
 
 if __name__ == "__main__":
-    ConstantTables.ConstantTables()
+    ConstantTables.ConstantTables.init_value()
     GenerateExcelTable()

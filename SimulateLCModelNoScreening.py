@@ -1,11 +1,15 @@
 # python3
 
 """
-In this class, I did ... Input variables are:
-
+The class will show the real-time (every month) visually graphic flow to simulate LC Modeling
+Input variables are:
+    window:
+    LC_result:
 
 Example python code use:
-
+    window = tk.Toplevel(root)
+    LC_result = run_model_for_1_person()
+    window_LC_model_no_screening = SimulateLCModelNoScreening(window, LC_result)
 
 Author: Phong Nguyen (vietphong.nguyen@gmail.com)
 Last modified: SEP 2019
@@ -19,7 +23,7 @@ from get_years_remain_NO_screening import str_sum
 class SimulateLCModelNoScreening:
     def __init__(self, window, LC_result):
         # LC_result = [person, years_remain]
-        # years_remain = [year remain, disease_free, local_LC, regional_LC, distant_LC, death_other_causes]
+        # years_remain = [year remain, disease_free, local_LC, regional_LC, distant_LC, death_other_causes, dead_LC]
         # local_LC = [number of local_LC, month infected]
         try:
             person = LC_result[0]
@@ -31,6 +35,7 @@ class SimulateLCModelNoScreening:
             regional_LC = years_remain_result[3]
             distant_LC = years_remain_result[4]
             death_other_causes = years_remain_result[5]
+            death_LC = years_remain_result[6]
             total_local_LC = str_sum(local_LC)
             total_regional_LC = str_sum(regional_LC)
             total_distant_LC = str_sum(distant_LC)
@@ -39,6 +44,7 @@ class SimulateLCModelNoScreening:
             years_remain = 50
             disease_free = 1
             death_other_causes = 0
+            death_LC = 0
             total_local_LC = "0"
             total_regional_LC = "0"
             total_distant_LC = "0"
@@ -91,7 +97,7 @@ class SimulateLCModelNoScreening:
             .place(x=205, y=495)
 
         # Display the Death LC
-        tk.Label(self.window, text=total_distant_LC[:number_of_digit_display], font=("Helvetica", 12)) \
+        tk.Label(self.window, text=str("{:.20f}".format(death_LC))[:number_of_digit_display], font=("Helvetica", 12)) \
             .place(x=610, y=550)
 
         # Display current age and life remain
